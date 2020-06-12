@@ -27,8 +27,24 @@
 #@output int low_contrast
 
 #@output int line_width
-#@output BigDecimal mitocondrial_footprint
+#@output BigDecimal mitochondrial_footprint
 #@output BigDecimal min_line_length
+
+#@output BigDecimal punctate_count
+#@output BigDecimal punctate_len_mean
+#@output BigDecimal punctate_len_med
+#@output BigDecimal punctate_len_stdevp
+
+#@output BigDecimal rod_count
+#@output BigDecimal rod_len_mean
+#@output BigDecimal rod_len_med
+#@output BigDecimal rod_len_stdevp
+
+#@output BigDecimal network_count
+#@output BigDecimal network_branch_count
+#@output BigDecimal network_len_mean
+# #@output BigDecimal network_len_med
+# #@output BigDecimal network_len_stdevp
 
 #@output BigDecimal branch_len_mean
 #@output BigDecimal branch_len_med
@@ -74,8 +90,11 @@ def ridge_detect(imp, rd_max, rd_min, rd_width, rd_length):
     skel.hide()
     return(skel)
 
-def average(num_list):
-    return sum(num_list)/len(num_list)
+def average(num_list, divide_by=None):
+    if divide_by is None:
+        return sum(num_list)/len(num_list)
+    else:
+        return sum(num_list)/divide_by
 
 def median(num_list):
     sorted_list = sorted(num_list)
@@ -130,6 +149,19 @@ def run():
         'low_contrast',
         'line_width',
         'mitochondrial_footprint',
+        'punctate_count',
+        'punctate_len_mean',
+        'punctate_len_med',
+        'punctate_len_stdevp',
+        'rod_count',
+        'rod_len_mean',
+        'rod_len_med',
+        'rod_len_stdevp',
+        'network_count',
+        'network_branch_count',
+        'network_len_mean',
+        # 'network_len_med',
+        # 'network_len_stdevp',
         'branch_len_mean',
         'branch_len_med',
         'branch_len_stdevp',
@@ -215,11 +247,52 @@ def run():
     skel = AnalyzeSkeleton_()
     skel.setup("", skeleton)
     IJ.log("Analyzing skeleton...")
-    skel_result = skel.run()
+    skel_result = skel.run() # Results from Analyze Skeleton
+                             # (SkeletonResults object) 
+                             # https://javadoc.scijava.org/Fiji/sc/fiji/analyzeSkeleton/SkeletonResult.html
+
+    branch_counts   = skel_result.getBranches()
+    avg_branch_lens = skel_result.getAverageBranchLength()
+
+    punctates, rods, networks, network_branch_count = 0, 0, 0, 0
+    punctate_lens, rod_lens, network_lens = [], [], [] # TODO track indicies instead of copying vals to new lists
+
+    for i in range(len(branch_counts)):
+        if branch_counts[i] == 0:
+            punctates += 1
+            punctate_lens.append(avg_branch_lens[i])
+        elif branch_counts[i] == 1:
+            rods += 1
+            rod_lens.append(avg_branch_lens[i])
+        else:
+            networks += 1
+            network_lens.append(avg_branch_lens[i] * branch_counts[i])
+            network_branch_count += branch_counts[i]
+
+    output_parameters['punctate_count']      = punctates
+    output_parameters['punctate_len_mean']   = average(punctate_lens)
+    output_parameters['punctate_len_med']    = median(punctate_lens)
+    output_parameters['punctate_len_stdevp'] = pstdev(punctate_lens)
+
+    output_parameters['rod_count']      = rods
+    output_parameters['rod_len_mean']   = average(rod_lens)
+    output_parameters['rod_len_med']    = median(rod_lens)
+    output_parameters['rod_len_stdevp'] = pstdev(rod_lens)
+
+    output_parameters['network_count']        = networks
+    output_parameters['network_branch_count'] = network_branch_count
+    output_parameters['network_len_mean']   = average(network_lens, network_branch_count)
+    # output_parameters['network_len_med']    = median(network_lens)
+    # output_parameters['network_len_stdevp'] = pstdev(network_lens)
+
+
+
 
     IJ.log("Computing graph based parameters...")
     branch_lengths = []
     summed_lengths = []
+    
+    
     graphs = skel_result.getGraph()
 
     for graph in graphs:
@@ -231,17 +304,19 @@ def run():
             summed_length += length
         summed_lengths.append(summed_length)
 
+
+
     output_parameters["branch_len_mean"]   = average(branch_lengths)
-    output_parameters["branch_len_med"] = median(branch_lengths)
+    output_parameters["branch_len_med"]    = median(branch_lengths)
     output_parameters["branch_len_stdevp"] = pstdev(branch_lengths)
 
     output_parameters["summed_branch_lens_mean"]   = average(summed_lengths)
-    output_parameters["summed_branch_lens_med"] = median(summed_lengths)
+    output_parameters["summed_branch_lens_med"]    = median(summed_lengths)
     output_parameters["summed_branch_lens_stdevp"] = pstdev(summed_lengths)
 
     branches = list(skel_result.getBranches())
     output_parameters["network_branches_mean"]   = average(branches)
-    output_parameters["network_branches_med"] = median(branches)
+    output_parameters["network_branches_med"]    = median(branches)
     output_parameters["network_branches_stdevp"] = pstdev(branches)
 
     # Create/append results to a ResultsTable...

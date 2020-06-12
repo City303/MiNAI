@@ -34,7 +34,7 @@ def main():
     # that script is updated with new outputs, please add them to this
     # output order at the column it should be presented in. Otherwise,
     # the new output will not be included in the results.
-    OUTPUT_ORDER = [
+    output_order = [
         'image_title',
         'preprocessor_path',
         'postprocessor_path',
@@ -43,7 +43,20 @@ def main():
         'high_contrast',
         'low_contrast',
         'line_width',
-        'mitocondrial_footprint',
+        'mitochondrial_footprint',
+        'punctate_count',
+        'punctate_len_mean',
+        'punctate_len_med',
+        'punctate_len_stdevp',
+        'rod_count',
+        'rod_len_mean',
+        'rod_len_med',
+        'rod_len_stdevp',
+        'network_count',
+        'network_branch_count',
+        'network_len_mean',
+        # 'network_len_med',
+        # 'network_len_stdevp',
         'branch_len_mean',
         'branch_len_med',
         'branch_len_stdevp',
@@ -57,13 +70,21 @@ def main():
 
     with open(MACRO_PATH, 'r') as f:
         mina_macro = f.read()
- 
-    init_ij(ij, os.path.join(ROOT, FILE))       # Load the image into the IJ module
-    result = ij.py.run_script("py", mina_macro) # Run MiNA on the IJ module      
-    output = ij.py.from_java(result.getOutputs())
 
+    mina_args = {
+        'use_ridge_detection': ij.py.to_java(False)
+    }
+ 
+    # Load the image into the IJ module
+    init_ij(ij, os.path.join(ROOT, FILE))       
+
+    # Run MiNA on the IJ module
+    result = ij.py.run_script("py", mina_macro, mina_args)  
+
+    # Get the outputs
+    output = ij.py.from_java(result.getOutputs())
     print('\nOutput parameters:')
-    for key in OUTPUT_ORDER:
+    for key in output_order:
         print(key, ': ', output[key])
 
 '''
