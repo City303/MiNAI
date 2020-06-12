@@ -11,8 +11,32 @@
 
 #@ OpService ops
 #@ ScriptService scripts
-#@ StatusService status
 #@ UIService ui
+
+#@output String image_title
+#@output String preprocessor_path
+#@output String postprocessor_path
+#@output String thresholding_op
+#@output Boolean use_ridge_detection
+
+#@output int high_contrast
+#@output int low_contrast
+
+#@output int line_width
+#@output BigDecimal mitocondrial_footprint
+
+#@output BigDecimal branch_len_mean
+#@output BigDecimal branch_len_med
+#@output BigDecimal branch_len_stdevp
+
+#@output BigDecimal summed_branch_lens_mean
+#@output BigDecimal summed_branch_lens_med
+#@output BigDecimal summed_branch_lens_stdevp
+
+#@output BigDecimal network_branches_mean
+#@output BigDecimal network_branches_med
+#@output BigDecimal network_branches_stdevp
+
 
 from math import sqrt
 from ij import IJ
@@ -29,7 +53,7 @@ from net.imglib2.type.numeric.integer import UnsignedByteType
 
 from sc.fiji.analyzeSkeleton import AnalyzeSkeleton_
 
-from ij3d import Image3DUniverse
+# from ij3d import Image3DUniverse
 
 from org.scijava.vecmath import Point3f
 from org.scijava.vecmath import Color3f
@@ -62,33 +86,34 @@ def pstdev(num_list):
     var = 0 # Variance
     avg = average(num_list)
     for num in num_list:
-        var += (num_list - avg)**2
-    var /= len(num_list)
+        var = var + (num - avg)**2
+    var = var / len(num_list)
     return sqrt(var)
 
 
 # The run function..............................................................
 def run():
 
-    output_parameters = {"image title" : "",
-    "preprocessor path" : float,
-    "post processor path" : float,
-    "thresholding op" : float,
-    "use ridge detection" : bool,
-    "high contrast" : int,
-    "low contrast" : int,
-    "line width" : int,
-    "minimum line length" : int,
-    "mitochondrial footprint" : float,
-    "branch length mean" : float,
-    "branch length median" : float,
-    "branch length stdevp" : float,
-    "summed branch lengths mean" : float,
-    "summed branch lengths median" : float,
-    "summed branch lengths stdevp" : float,
-    "network branches mean" : float,
-    "network branches median" : float,
-    "network branches stdevp" : float}
+    # output_parameters = {"image title" : "",
+    # "preprocessor path" : float,
+    # "post processor path" : float,
+    # "thresholding op" : float,
+    # "use ridge detection" : bool,
+    # "high contrast" : int,
+    # "low contrast" : int,
+    # "line width" : int,
+    # "minimum line length" : int,
+    # "mitochondrial footprint" : float,
+    # "branch length mean" : float,
+    # "branch length median" : float,
+    # "branch length stdevp" : float,
+    # "summed branch lengths mean" : float,
+    # "summed branch lengths median" : float,
+    # "summed branch lengths stdevp" : float,
+    # "network branches mean" : float,
+    # "network branches median" : float,
+    # "network branches stdevp" : float}
+    output_parameters = {}
 
     output_order = ["image title",
     "preprocessor path",
@@ -111,9 +136,10 @@ def run():
     "network branches stdevp"]
 
     # Perform any preprocessing steps...
-    status.showStatus("Preprocessing image...")
+    imp = IJ.getImage() # ImageJ is not detecting imp, so maybe this will fix it.
     if preprocessor_path != None:
         if preprocessor_path.exists():
+            IJ.log("Preprocessor path found! Preprocessing image...")
             preprocessor_thread = scripts.run(preprocessor_path, True)
             preprocessor_thread.get()
             imp = WindowManager.getCurrentImage()
@@ -140,7 +166,8 @@ def run():
     output_parameters["minimum line length"] = rd_length
 
     # Create and ImgPlus copy of the ImagePlus for thresholding with ops...
-    status.showStatus("Determining threshold level...")
+    IJ.log("Determining threshold level...")
+
     imp_title = imp.getTitle()
     slices = imp.getNSlices()
     frames = imp.getNFrames()
@@ -178,13 +205,13 @@ def run():
         IJ.run(skeleton, "Skeletonize (2D/3D)", "")
 
     # Analyze the skeleton...
-    status.showStatus("Setting up skeleton analysis...")
+    IJ.log("Setting up skeleton analysis...")
     skel = AnalyzeSkeleton_()
     skel.setup("", skeleton)
-    status.showStatus("Analyzing skeleton...")
+    IJ.log("Analyzing skeleton...")
     skel_result = skel.run()
 
-    status.showStatus("Computing graph based parameters...")
+    IJ.log("Computing graph based parameters...")
     branch_lengths = []
     summed_lengths = []
     graphs = skel_result.getGraph()
@@ -212,7 +239,7 @@ def run():
     output_parameters["network branches stdevp"] = pstdev(branches)
 
     # Create/append results to a ResultsTable...
-    status.showStatus("Display results...")
+    IJ.log("Display results...")
     if "Mito Morphology" in list(WindowManager.getNonImageTitles()):
         rt = WindowManager.getWindow("Mito Morphology").getTextPanel().getOrCreateResultsTable()
     else:
@@ -231,11 +258,11 @@ def run():
         else:
             rt.addValue("Comment", user_comment)
 
-    rt.show("Mito Morphology")
+    # rt.show("Mito Morphology") # Do not show in headless mode
 
 	# Create overlays on the original ImagePlus and display them if 2D...
     if imp.getNSlices() == 1:
-        status.showStatus("Generate overlays...")
+        IJ.log("Generate overlays...")
         IJ.run(skeleton, "Green", "")
         IJ.run(binary, "Magenta", "")
 
@@ -253,6 +280,7 @@ def run():
         imp.setOverlay(overlay)
         imp.updateAndDraw()
 
+    '''
     # Generate a 3D model if a stack
     if imp.getNSlices() > 1:
 
@@ -290,20 +318,47 @@ def run():
         # Add the surface
         univ.addMesh(binary)
         univ.getContent("binary").setTransparency(0.5)
+    '''
 
     # Perform any postprocessing steps...
-    status.showStatus("Running postprocessing...")
     if postprocessor_path != None:
         if postprocessor_path.exists():
+            IJ.log("Postprocessor path found! Running postprocessing...")
             postprocessor_thread = scripts.run(postprocessor_path, True)
             postprocessor_thread.get()
-
     else:
         pass
 
-    status.showStatus("Done analysis!")
+    IJ.log("Done analysis!")
+
+    return output_parameters
 
 # Run the script...
 if (__name__=="__main__") or (__name__=="__builtin__"):
-    print('TEST!')
-    run()
+    outputs = run()
+
+    # Collect all the outputs in their relevant titles.
+    image_title         = outputs["image title"]
+    preprocessor_path   = outputs["preprocessor path"]
+    postprocessor_path  = outputs["post processor path"]
+    thresholding_op     = outputs["thresholding op"]
+    use_ridge_detection = outputs["use ridge detection"]
+
+    high_contrast = outputs["high contrast"]
+    low_contrast  = outputs["low contrast"]
+
+    line_width             = outputs["line width"]
+    min_line_length        = outputs["minimum line length"]
+    mitocondrial_footprint = outputs["mitochondrial footprint"]
+
+    branch_len_mean   = outputs["branch length mean"]
+    branch_len_med    = outputs["branch length median"]
+    branch_len_stdevp = outputs["branch length stdevp"]
+
+    summed_branch_lens_mean   = outputs["summed branch lengths mean"]
+    summed_branch_lens_med    = outputs["summed branch lengths median"]
+    summed_branch_lens_stdevp = outputs["summed branch lengths stdevp"]
+
+    network_branches_mean   = outputs["network branches mean"]
+    network_branches_med    = outputs["network branches median"]
+    network_branches_stdevp = outputs["network branches stdevp"]
