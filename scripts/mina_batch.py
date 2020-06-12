@@ -22,7 +22,7 @@ result = runMacro(macro_path)
 """
 
 args = {
-    'image_path': none,
+    'image_path': os.path.join(ROOT, FILE),
     'macro_path': MACRO_PATH
 }
 result = ij.py.run_script(macro, args)
