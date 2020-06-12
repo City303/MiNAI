@@ -14,16 +14,19 @@ image = ij.io().open(os.path.join(ROOT,FILE))
 
 macro="""
 #@ String image_path
-#@ String macro_path
+#@ String macro_body
 #@output Object result
 
 open(image_path)
-result = runMacro(macro_path)
+result = eval("python", macro_body)
 """
+
+with open(MACRO_PATH, 'r') as f:
+    macro_body = f.read()
 
 args = {
     'image_path': os.path.join(ROOT, FILE),
-    'macro_path': MACRO_PATH
+    'macro_body': macro_body
 }
 result = ij.py.run_macro(macro, args)
 
