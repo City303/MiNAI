@@ -25,7 +25,7 @@ args = {
     'image_path': os.path.join(ROOT, FILE),
     'macro_path': MACRO_PATH
 }
-result = ij.py.run_script(macro, args)
+result = ij.py.run_macro(macro, args)
 
 print(result)
 print('Success')
