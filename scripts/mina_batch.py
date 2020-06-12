@@ -12,10 +12,20 @@ MACRO_EXT  = 'py'
 
 image = ij.io().open(os.path.join(ROOT,FILE))
 
-with open(MACRO_PATH) as macro:
-    macro_body = macro.read()
-    args = None
-    result = ij.py.run_script(MACRO_EXT, macro_body, args)
+macro="""
+#@ String image_path
+#@ String macro_path
+#@output Object result
+
+open(image_path)
+result = runMacro(macro_path)
+"""
+
+args = {
+    'image_path': none,
+    'macro_path': MACRO_PATH
+}
+result = ij.py.run_script(macro, args)
 
 print(result)
 print('Success')
