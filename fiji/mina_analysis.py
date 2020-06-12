@@ -13,6 +13,10 @@
 #@ ScriptService scripts
 #@ UIService ui
 
+# OUTPUT VARIABLES GO BELOW. Define type and name.
+# If they appear in the code and are appended to
+# the outputs dict, they will be returned.
+
 #@output String image_title
 #@output String preprocessor_path
 #@output String postprocessor_path
@@ -24,6 +28,7 @@
 
 #@output int line_width
 #@output BigDecimal mitocondrial_footprint
+#@output BigDecimal min_line_length
 
 #@output BigDecimal branch_len_mean
 #@output BigDecimal branch_len_med
@@ -115,25 +120,26 @@ def run():
     # "network branches stdevp" : float}
     output_parameters = {}
 
-    output_order = ["image title",
-    "preprocessor path",
-    "post processor path",
-    "thresholding op",
-    "use ridge detection",
-    "high contrast",
-    "low contrast",
-    "line width",
-    "minimum line length",
-    "mitochondrial footprint",
-    "branch length mean",
-    "branch length median",
-    "branch length stdevp",
-    "summed branch lengths mean",
-    "summed branch lengths median",
-    "summed branch lengths stdevp",
-    "network branches mean",
-    "network branches median",
-    "network branches stdevp"]
+    output_order = [
+        'image_title',
+        'preprocessor_path',
+        'postprocessor_path',
+        'thresholding_op',
+        'use_ridge_detection',
+        'high_contrast',
+        'low_contrast',
+        'line_width',
+        'mitochondrial_footprint',
+        'branch_len_mean',
+        'branch_len_med',
+        'branch_len_stdevp',
+        'summed_branch_lens_mean',
+        'summed_branch_lens_med',
+        'summed_branch_lens_stdevp',
+        'network_branches_mean',
+        'network_branches_med',
+        'network_branches_stdevp',
+    ]
 
     # Perform any preprocessing steps...
     imp = IJ.getImage() # ImageJ is not detecting imp, so maybe this will fix it.
@@ -156,14 +162,14 @@ def run():
     else:
         postprocessor_str = preprocessor_path.getCanonicalPath()
 
-    output_parameters["preprocessor path"] = preprocessor_str
-    output_parameters["post processor path"] = postprocessor_str
-    output_parameters["thresholding op"] = threshold_method
-    output_parameters["use ridge detection"] = str(use_ridge_detection)
-    output_parameters["high contrast"] = rd_max
-    output_parameters["low contrast"] = rd_min
-    output_parameters["line width"] = rd_width
-    output_parameters["minimum line length"] = rd_length
+    output_parameters["preprocessor_path"] = preprocessor_str
+    output_parameters["postprocessor_path"] = postprocessor_str
+    output_parameters["thresholding_op"] = threshold_method
+    output_parameters["use_ridge_detection"] = str(use_ridge_detection)
+    output_parameters["high_contrast"] = rd_max
+    output_parameters["low_contrast"] = rd_min
+    output_parameters["line_width"] = rd_width
+    output_parameters["min_line_length"] = rd_length
 
     # Create and ImgPlus copy of the ImagePlus for thresholding with ops...
     IJ.log("Determining threshold level...")
@@ -171,7 +177,7 @@ def run():
     imp_title = imp.getTitle()
     slices = imp.getNSlices()
     frames = imp.getNFrames()
-    output_parameters["image title"] = imp_title
+    output_parameters["image_title"] = imp_title
     imp_calibration = imp.getCalibration()
     imp_channel = Duplicator().run(imp, imp.getChannel(), imp.getChannel(), 1, slices, 1, frames)
     img = ImageJFunctions.wrap(imp_channel)
@@ -186,7 +192,7 @@ def run():
     if binary.getNSlices() == 1:
         area = binary.getStatistics(Measurements.AREA).area
         area_fraction = binary.getStatistics(Measurements.AREA_FRACTION).areaFraction
-        output_parameters["mitochondrial footprint"] =  area * area_fraction / 100.0
+        output_parameters["mitochondrial_footprint"] =  area * area_fraction / 100.0
     else:
         mito_footprint = 0.0
         for slice in range(binary.getNSlices()):
@@ -194,7 +200,7 @@ def run():
                 area = binary.getStatistics(Measurements.AREA).area
                 area_fraction = binary.getStatistics(Measurements.AREA_FRACTION).areaFraction
                 mito_footprint += area * area_fraction / 100.0
-        output_parameters["mitochondrial footprint"] = mito_footprint * imp_calibration.pixelDepth
+        output_parameters["mitochondrial_footprint"] = mito_footprint * imp_calibration.pixelDepth
 
     # Generate skeleton from masked binary ...
     # Generate ridges first if using Ridge Detection
@@ -225,18 +231,18 @@ def run():
             summed_length += length
         summed_lengths.append(summed_length)
 
-    output_parameters["branch length mean"]   = average(branch_lengths)
-    output_parameters["branch length median"] = median(branch_lengths)
-    output_parameters["branch length stdevp"] = pstdev(branch_lengths)
+    output_parameters["branch_len_mean"]   = average(branch_lengths)
+    output_parameters["branch_len_med"] = median(branch_lengths)
+    output_parameters["branch_len_stdevp"] = pstdev(branch_lengths)
 
-    output_parameters["summed branch lengths mean"]   = average(summed_lengths)
-    output_parameters["summed branch lengths median"] = median(summed_lengths)
-    output_parameters["summed branch lengths stdevp"] = pstdev(summed_lengths)
+    output_parameters["summed_branch_lens_mean"]   = average(summed_lengths)
+    output_parameters["summed_branch_lens_med"] = median(summed_lengths)
+    output_parameters["summed_branch_lens_stdevp"] = pstdev(summed_lengths)
 
     branches = list(skel_result.getBranches())
-    output_parameters["network branches mean"]   = average(branches)
-    output_parameters["network branches median"] = median(branches)
-    output_parameters["network branches stdevp"] = pstdev(branches)
+    output_parameters["network_branches_mean"]   = average(branches)
+    output_parameters["network_branches_med"] = median(branches)
+    output_parameters["network_branches_stdevp"] = pstdev(branches)
 
     # Create/append results to a ResultsTable...
     IJ.log("Display results...")
@@ -337,28 +343,11 @@ def run():
 if (__name__=="__main__") or (__name__=="__builtin__"):
     outputs = run()
 
-    # Collect all the outputs in their relevant titles.
-    image_title         = outputs["image title"]
-    preprocessor_path   = outputs["preprocessor path"]
-    postprocessor_path  = outputs["post processor path"]
-    thresholding_op     = outputs["thresholding op"]
-    use_ridge_detection = outputs["use ridge detection"]
-
-    high_contrast = outputs["high contrast"]
-    low_contrast  = outputs["low contrast"]
-
-    line_width             = outputs["line width"]
-    min_line_length        = outputs["minimum line length"]
-    mitocondrial_footprint = outputs["mitochondrial footprint"]
-
-    branch_len_mean   = outputs["branch length mean"]
-    branch_len_med    = outputs["branch length median"]
-    branch_len_stdevp = outputs["branch length stdevp"]
-
-    summed_branch_lens_mean   = outputs["summed branch lengths mean"]
-    summed_branch_lens_med    = outputs["summed branch lengths median"]
-    summed_branch_lens_stdevp = outputs["summed branch lengths stdevp"]
-
-    network_branches_mean   = outputs["network branches mean"]
-    network_branches_med    = outputs["network branches median"]
-    network_branches_stdevp = outputs["network branches stdevp"]
+    # Assign each of the outputs to a global
+    # variable of the same name. 
+    # 
+    # This will return the variable if it is listed as
+    # an output at the top of this document, and the
+    # listing follows ImageJ script parameter rules.
+    for k, v in outputs.items():
+        globals()[k] = v
