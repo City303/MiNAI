@@ -8,6 +8,7 @@
 #@ BigInteger(label="Line width:", value=1, required=False) rd_width
 #@ BigInteger(label="Line length:", value=3, required=False) rd_length
 #@ String(label="User comment: ", value="") user_comment
+#@ Boolean(label="Verbose:", value=False) verbose
 
 #@ OpService ops
 #@ ScriptService scripts
@@ -63,6 +64,7 @@ from math import sqrt
 from ij import IJ
 from ij import ImagePlus
 from ij import WindowManager
+from ij.io import LogStream
 from ij.gui import ImageRoi
 from ij.gui import Overlay
 from ij.measure import ResultsTable, Measurements
@@ -177,7 +179,8 @@ def run():
     imp = IJ.getImage() # ImageJ is not detecting imp, so maybe this will fix it.
     if preprocessor_path != None:
         if preprocessor_path.exists():
-            IJ.log("Preprocessor path found! Preprocessing image...")
+            if verbose:
+                IJ.log("Preprocessor path found! Preprocessing image...")
             preprocessor_thread = scripts.run(preprocessor_path, True)
             preprocessor_thread.get()
             imp = WindowManager.getCurrentImage()
@@ -204,7 +207,8 @@ def run():
     output_parameters["min_line_length"] = rd_length
 
     # Create and ImgPlus copy of the ImagePlus for thresholding with ops...
-    IJ.log("Determining threshold level...")
+    if verbose:
+        IJ.log("Determining threshold level...")
 
     imp_title = imp.getTitle()
     slices = imp.getNSlices()
@@ -243,10 +247,12 @@ def run():
         IJ.run(skeleton, "Skeletonize (2D/3D)", "")
 
     # Analyze the skeleton...
-    IJ.log("Setting up skeleton analysis...")
+    if verbose:
+        IJ.log("Setting up skeleton analysis...")
     skel = AnalyzeSkeleton_()
     skel.setup("", skeleton)
-    IJ.log("Analyzing skeleton...")
+    if verbose:
+        IJ.log("Analyzing skeleton...")
     skel_result = skel.run() # Results from Analyze Skeleton
                              # (SkeletonResults object) 
                              # https://javadoc.scijava.org/Fiji/sc/fiji/analyzeSkeleton/SkeletonResult.html
@@ -287,8 +293,8 @@ def run():
 
 
 
-
-    IJ.log("Computing graph based parameters...")
+    if verbose:
+        IJ.log("Computing graph based parameters...")
     branch_lengths = []
     summed_lengths = []
     
@@ -320,7 +326,8 @@ def run():
     output_parameters["network_branches_stdevp"] = pstdev(branches)
 
     # Create/append results to a ResultsTable...
-    IJ.log("Display results...")
+    if verbose:
+        IJ.log("Display results...")
     if "Mito Morphology" in list(WindowManager.getNonImageTitles()):
         rt = WindowManager.getWindow("Mito Morphology").getTextPanel().getOrCreateResultsTable()
     else:
@@ -343,7 +350,8 @@ def run():
 
 	# Create overlays on the original ImagePlus and display them if 2D...
     if imp.getNSlices() == 1:
-        IJ.log("Generate overlays...")
+        if verbose:
+            IJ.log("Generate overlays...")
         IJ.run(skeleton, "Green", "")
         IJ.run(binary, "Magenta", "")
 
@@ -404,13 +412,15 @@ def run():
     # Perform any postprocessing steps...
     if postprocessor_path != None:
         if postprocessor_path.exists():
-            IJ.log("Postprocessor path found! Running postprocessing...")
+            if verbose:
+                IJ.log("Postprocessor path found! Running postprocessing...")
             postprocessor_thread = scripts.run(postprocessor_path, True)
             postprocessor_thread.get()
     else:
         pass
 
-    IJ.log("Done analysis!")
+    if verbose:
+        IJ.log("Done analysis!")
 
     return output_parameters
 
