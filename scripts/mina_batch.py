@@ -25,7 +25,7 @@ Params:
     path: path to image
 '''
 def eval_image(ij, path, verbose = False):
-    MACRO_PATH = '/home/mitocab/Downloads/Fiji.app/macros/MiNA-py/mina_analysis.py'
+    MACRO_PATH = '/home/mitocab/GitHub/MiNAI/fiji/mina_analysis.py'
 
     # The list of outputs returned from mina_analysis.py. If the code for
     # that script is updated with new outputs, please add them to this
@@ -93,7 +93,8 @@ def main():
     skel_re = re.compile('.*_cp_skel_[0-9]*.*')
     # FILE = 'BJ & SBG4-5/N3 5-2-19/No FCCP/SBG5/image 4/sbg5 p8 no fccp dish 6 r4 05-02-2019_cp_skel_1.tiff'
 
-    ij = imagej.init('/home/mitocab/Downloads/Fiji.app')
+    ij = imagej.init('sc.fiji:fiji')
+    print(ij.getApp().getInfo(True))
     images = []
 
     for subdir, dirs, files in os.walk(ROOT):
@@ -101,9 +102,10 @@ def main():
             if skel_re.match(file):
                 images.append(os.path.join(ROOT, subdir, file))
 
+    images  = set(images)
     outputs = []
-    for i in tqdm(range(len(images))):
-        outputs.append(eval_image(ij, images[i]))
+    for idx, image in enumerate(tqdm(images)):
+        outputs.append(eval_image(ij, image))
 
     df = pd.DataFrame.from_records(outputs)
     df.to_csv('/home/mitocab/Documents/output.csv')
