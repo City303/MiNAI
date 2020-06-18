@@ -1,26 +1,20 @@
 #@ ImagePlus imp
-#@ File(label="Pre-processor path:", value = "", required=False) preprocessor_path
-#@ File(label="Post-processing path:", required=False) postprocessor_path
-#@ String(label = "Thresholding Op:", value="otsu", choices={"huang", "ij1", "intermodes", "isoData", "li", "maxEntropy", "maxLikelihood", "mean", "minError", "minimum", "moments", "otsu", "percentile", "renyiEntropy", "rosin", "shanbhag", "triangle", "yen"}) threshold_method
-#@ Boolean(label="Use ridge detection (2D only):", value=False) use_ridge_detection
-#@ BigInteger(label="High contrast:", value=75, required=False) rd_max
-#@ BigInteger(label="Low contrast:", value=5, required=False) rd_min
-#@ BigInteger(label="Line width:", value=1, required=False) rd_width
-#@ BigInteger(label="Line length:", value=3, required=False) rd_length
-#@ String(label="User comment: ", value="") user_comment
-#@ Boolean(label="Verbose:", value=False) verbose
+#@ String  (label="Root directory: ", value="") root_directory
+#@ String  (label="Regex: ", value="a^") regex_string
+#@ String  (label = "Thresholding Op:", value="otsu", choices={"huang", "ij1", "intermodes", "isoData", "li", "maxEntropy", "maxLikelihood", "mean", "minError", "minimum", "moments", "otsu", "percentile", "renyiEntropy", "rosin", "shanbhag", "triangle", "yen"}) threshold_method
+#@ Boolean (label="Use ridge detection (2D only):", value=False) use_ridge_detection
+#@ BigInteger (label="High contrast:", value=75, required=False) rd_max
+#@ BigInteger (label="Low contrast:", value=5, required=False) rd_min
+#@ BigInteger (label="Line width:", value=1, required=False) rd_width
+#@ BigInteger (label="Line length:", value=3, required=False) rd_length
+#@ String  (label="User comment: ", value="") user_comment
+#@ Boolean (label="Verbose:", value=False) verbose
 
 #@ OpService ops
 #@ ScriptService scripts
 #@ UIService ui
 
-# OUTPUT VARIABLES GO BELOW. Define type and name.
-# If they appear in the code and are appended to
-# the outputs dict, they will be returned.
-
 #@output String image_title
-#@output String preprocessor_path
-#@output String postprocessor_path
 #@output String thresholding_op
 #@output Boolean use_ridge_detection
 
@@ -59,6 +53,8 @@
 #@output BigDecimal network_branches_med
 #@output BigDecimal network_branches_stdevp
 
+import os
+import re
 
 from math import sqrt
 from ij import IJ
@@ -70,6 +66,7 @@ from ij.gui import Overlay
 from ij.measure import ResultsTable, Measurements
 from ij.plugin import Duplicator
 from ij.process import ImageStatistics
+from java.io import File
 
 from net.imglib2.img.display.imagej import ImageJFunctions
 from net.imglib2.type.numeric.integer import UnsignedByteType
@@ -116,13 +113,29 @@ def pstdev(num_list):
     var = var / len(num_list)
     return sqrt(var)
 
+def batch_load(root_dir, regex_str):
+    rgx    = re.compile(regex_str)
+    image_paths = []
+    images      = []
+
+    for subdir, dirs, files in os.walk(root_dir):
+        for file in files:
+            if rgx.match(file):
+                image_paths.append(os.path.join(root_dir, subdir, file))
+
+    image_paths = set(image_paths)
+    
+    for ipath in image_paths:
+        imp = IJ.openImage(ipath)
+        if imp:
+            images.append(imp)
+
+    return images
 
 # The run function..............................................................
 def run():
 
     # output_parameters = {"image title" : "",
-    # "preprocessor path" : float,
-    # "post processor path" : float,
     # "thresholding op" : float,
     # "use ridge detection" : bool,
     # "high contrast" : int,
@@ -143,8 +156,6 @@ def run():
 
     output_order = [
         'image_title',
-        'preprocessor_path',
-        'postprocessor_path',
         'thresholding_op',
         'use_ridge_detection',
         'high_contrast',
@@ -175,36 +186,21 @@ def run():
         'network_branches_stdevp',
     ]
 
-    # Perform any preprocessing steps...
-    imp = IJ.getImage() # ImageJ is not detecting imp, so maybe this will fix it.
-    if preprocessor_path != None:
-        if preprocessor_path.exists():
-            if verbose:
-                IJ.log("Preprocessor path found! Preprocessing image...")
-            preprocessor_thread = scripts.run(preprocessor_path, True)
-            preprocessor_thread.get()
-            imp = WindowManager.getCurrentImage()
-    else:
-        pass
+    # TODO remove when you get globals working
+    # root_directory = '/home/mitocab/Documents/Box-05282020'
+    # regex_string   = '.*_cp_skel_[0-9]*.*'
+    imp = batch_load(root_directory, regex_string)[0]
+   
 
     # Store all of the analysis parameters in the table
-    if preprocessor_path == None:
-        preprocessor_str = ""
-    else:
-        preprocessor_str = preprocessor_path.getCanonicalPath()
-    if postprocessor_path == None:
-        postprocessor_str = ""
-    else:
-        postprocessor_str = preprocessor_path.getCanonicalPath()
-
-    output_parameters["preprocessor_path"] = preprocessor_str
-    output_parameters["postprocessor_path"] = postprocessor_str
     output_parameters["thresholding_op"] = threshold_method
     output_parameters["use_ridge_detection"] = str(use_ridge_detection)
     output_parameters["high_contrast"] = rd_max
     output_parameters["low_contrast"] = rd_min
     output_parameters["line_width"] = rd_width
     output_parameters["min_line_length"] = rd_length
+
+
 
     # Create and ImgPlus copy of the ImagePlus for thresholding with ops...
     if verbose:
@@ -408,16 +404,6 @@ def run():
         univ.addMesh(binary)
         univ.getContent("binary").setTransparency(0.5)
     '''
-
-    # Perform any postprocessing steps...
-    if postprocessor_path != None:
-        if postprocessor_path.exists():
-            if verbose:
-                IJ.log("Postprocessor path found! Running postprocessing...")
-            postprocessor_thread = scripts.run(postprocessor_path, True)
-            postprocessor_thread.get()
-    else:
-        pass
 
     if verbose:
         IJ.log("Done analysis!")
