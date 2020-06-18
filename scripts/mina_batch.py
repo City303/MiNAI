@@ -89,6 +89,7 @@ def eval_image(ij, path, verbose = False):
 
 def main():
     ROOT    = '/home/mitocab/Documents/Box-05282020'
+    # ROOT    = '/home/mitocab/Documents/BatchScriptTest'
     skel_re = re.compile('.*_cp_skel_[0-9]*.*')
     # FILE = 'BJ & SBG4-5/N3 5-2-19/No FCCP/SBG5/image 4/sbg5 p8 no fccp dish 6 r4 05-02-2019_cp_skel_1.tiff'
 
@@ -100,12 +101,12 @@ def main():
             if skel_re.match(file):
                 images.append(os.path.join(ROOT, subdir, file))
 
+    outputs = []
     for i in tqdm(range(len(images))):
-        output = eval_image(ij, images[i])
+        outputs.append(eval_image(ij, images[i]))
 
-    print('\nOutput parameters:')
-    for key, title in output_order:
-        print(title, ': ', output[key])
+    df = pd.DataFrame.from_records(outputs)
+    df.to_csv('/home/mitocab/Documents/output.csv')
 
 
 
