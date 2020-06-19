@@ -2,43 +2,42 @@ import os, re, sys, contextlib
 import logging
 import imagej
 import pandas as pd
-from tqdm import tqdm
 
-OUTPUT_ORDER = [
-    ('image_title', 'Image title'),
-    #('preprocessor_path', 'Preprocessor path'),
-    #('postprocessor_path', 'Postprocessor path'),
-    ('thresholding_op', 'Thresholding method'),
-    ('use_ridge_detection', 'Ridge detection?'),
-    ('high_contrast', 'High contrast'),
-    ('low_contrast', 'Low constrast'),
-    ('line_width', 'Line width'),
-    ('mitochondrial_footprint', 'Mitochondrial footprint'),
-    ('punctate_count', 'Number of punctates'),
-    ('rod_count', 'Number of rods'),
-    ('network_count', 'Number of networks'),
-    #('punctate_len_mean', 'Mean punctate length'),
-    #('punctate_len_med', 'Median punctate length'),
-    #('punctate_len_stdevp', 'Stdev punctate length'),
-    ('rod_len_mean', 'Mean rod length'),
-    # ('rod_len_med', 'Median rod length'),
-    # ('rod_len_stdevp', 'Stdev rod length'),
-    ('network_branch_count', 'Network branch count'),
-    ('network_len_mean', 'Mean network length'),
-    # 'network_len_med',
-    # 'network_len_stdevp',
-    ('branch_len_mean', 'Mean branch length'),
-    # ('branch_len_med', 'Median branch length'),
-    # ('branch_len_stdevp', 'Stdev branch length'),
-    ('summed_branch_lens_mean', 'Mean summed branch lengths'),
-    #('summed_branch_lens_med', 'Median summed branch lengths'),
-    #('summed_branch_lens_stdevp', 'Stdev summed branch lengths'),
-    ('network_branches_mean', 'Mean network branches'),
-    #('network_branches_med', 'Median network branches'),
-    #('network_branches_stdevp', 'Stdev network branches'),
-]
 
 MACRO_PATH = '/home/mitocab/GitHub/MiNAI/fiji/mina_analysis.py'
+
+OUTPUT_ORDER = [
+        'image_title',
+        'thresholding_op',
+        'use_ridge_detection',
+        'high_contrast',
+        'low_contrast',
+        'line_width',
+        'min_line_length',
+        'mitochondrial_footprint',
+        'punctate_count',
+        'punctate_len_mean',
+        'punctate_len_med',
+        'punctate_len_stdevp',
+        'rod_count',
+        'rod_len_mean',
+        'rod_len_med',
+        'rod_len_stdevp',
+        'network_count',
+        'network_branch_count',
+        'network_len_mean',
+        # 'network_len_med',
+        # 'network_len_stdevp',
+        'branch_len_mean',
+        'branch_len_med',
+        'branch_len_stdevp',
+        'summed_branch_lens_mean',
+        'summed_branch_lens_med',
+        'summed_branch_lens_stdevp',
+        'network_branches_mean',
+        'network_branches_med',
+        'network_branches_stdevp',
+]
 
 
 def main():
@@ -50,18 +49,35 @@ def main():
         mina_macro = f.read()
 
     mina_args = {
-        'root_directory': ij.py.to_java('/home/mitocab/Documents/Box-05282020'),
-        'regex_string': ij.py.to_java('.*_cp_skel_[0-9]*.*'),
+        #'root_directory': '/home/mitocab/Documents/BatchScriptTest',
+        'root_directory': '/home/mitocab/Documents/Box-05282020',
+        'regex_string': '.*_cp_skel_[0-9]*.*',
         'use_ridge_detection': False,
-        'verbose': True,
+        'verbose': False,
     }
-    print(len(mina_macro))
+    # print(len(mina_macro))
 
     result = ij.py.run_script('py', mina_macro, mina_args) # Run MiNA on the IJ module
-    output = ij.py.from_java(result.getOutputs())          # Get the outputs
-    print(output)
+    ij_out = ij.py.from_java(result.getOutputs())          # Get the outputs
+    py_out = {} # Have to manually copy the IJ dictionary to Python, even though
+                # it is already Python-ated (because it is a JavaMap and not a dict)
+                # Pandas won't take the raw Pyimagej casting of the dict.
+    
+    sort_by_order = lambda kv: OUTPUT_ORDER.index(kv[0])
+    for k, v in sorted(ij_out.items(), key=sort_by_order):
+        # Format the items so that they are save-able into the CSV
+        # (and to potentially re-cast them to their proper types)
+        v = v.strip('[]').split(', ')
+        for i in range(len(v)):
+            if v[i].startswith("u'") or v[i].startswith('u"'):
+                v[i] = v[i][2:]
+            v[i] = v[i].strip('\'\"')
+        
+        ij_out[k] = v
+        py_out[k] = v
+        print(k, ':\n', py_out[k])
 
-    df = pd.DataFrame.from_dict(output)
+    df = pd.DataFrame.from_dict(py_out)
     df.to_csv('/home/mitocab/Documents/output.csv')
 
 

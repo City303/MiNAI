@@ -1,4 +1,4 @@
-#@ ImagePlus imp
+'''
 #@ String  (label="Root directory: ", value="") root_directory
 #@ String  (label="Regex: ", value="a^") regex_string
 #@ String  (label = "Thresholding Op:", value="otsu", choices={"huang", "ij1", "intermodes", "isoData", "li", "maxEntropy", "maxLikelihood", "mean", "minError", "minimum", "moments", "otsu", "percentile", "renyiEntropy", "rosin", "shanbhag", "triangle", "yen"}) threshold_method
@@ -9,49 +9,54 @@
 #@ BigInteger (label="Line length:", value=3, required=False) rd_length
 #@ String  (label="User comment: ", value="") user_comment
 #@ Boolean (label="Verbose:", value=False) verbose
-
 #@ OpService ops
-#@ ScriptService scripts
-#@ UIService ui
 
 #@output String image_title
 #@output String thresholding_op
-#@output Boolean use_ridge_detection
+#@output String use_ridge_detection
 
-#@output int high_contrast
-#@output int low_contrast
+#@output String high_contrast
+#@output String low_contrast
 
-#@output int line_width
-#@output BigDecimal mitochondrial_footprint
-#@output BigDecimal min_line_length
+#@output String line_width
+#@output String mitochondrial_footprint
+#@output String min_line_length
 
-#@output BigDecimal punctate_count
-#@output BigDecimal punctate_len_mean
-#@output BigDecimal punctate_len_med
-#@output BigDecimal punctate_len_stdevp
+#@output String punctate_count
+#@output String punctate_len_mean
+#@output String punctate_len_med
+#@output String punctate_len_stdevp
 
-#@output BigDecimal rod_count
-#@output BigDecimal rod_len_mean
-#@output BigDecimal rod_len_med
-#@output BigDecimal rod_len_stdevp
+#@output String rod_count
+#@output String rod_len_mean
+#@output String rod_len_med
+#@output String rod_len_stdevp
 
-#@output BigDecimal network_count
-#@output BigDecimal network_branch_count
-#@output BigDecimal network_len_mean
-# #@output BigDecimal network_len_med
-# #@output BigDecimal network_len_stdevp
+#@output String network_count
+#@output String network_branch_count
+#@output String network_len_mean
 
-#@output BigDecimal branch_len_mean
-#@output BigDecimal branch_len_med
-#@output BigDecimal branch_len_stdevp
+#@output String branch_len_mean
+#@output String branch_len_med
+#@output String branch_len_stdevp
 
-#@output BigDecimal summed_branch_lens_mean
-#@output BigDecimal summed_branch_lens_med
-#@output BigDecimal summed_branch_lens_stdevp
+#@output String summed_branch_lens_mean
+#@output String summed_branch_lens_med
+#@output String summed_branch_lens_stdevp
 
-#@output BigDecimal network_branches_mean
-#@output BigDecimal network_branches_med
-#@output BigDecimal network_branches_stdevp
+#@output String network_branches_mean
+#@output String network_branches_med
+#@output String network_branches_stdevp
+'''
+
+'''
+Everything is returned as a String since that is the only way
+(at least as we can recall) that Jython will play nice with
+PyImageJ when it comes to returning arrays. This is probably because
+the underlying structure of String is an array to begin with.
+
+This looks weird but actually works when the script is run in headless mode.
+'''
 
 import os
 import re
@@ -135,7 +140,7 @@ def batch_load(root_dir, regex_str):
 # The run function..............................................................
 def run():
 
-    # output_parameters = {"image title" : "",
+    # outputs = {"image title" : "",
     # "thresholding op" : float,
     # "use ridge detection" : bool,
     # "high contrast" : int,
@@ -152,7 +157,7 @@ def run():
     # "network branches mean" : float,
     # "network branches median" : float,
     # "network branches stdevp" : float}
-    output_parameters = {}
+    outputs = {}
 
     output_order = [
         'image_title',
@@ -161,6 +166,7 @@ def run():
         'high_contrast',
         'low_contrast',
         'line_width',
+        'min_line_length',
         'mitochondrial_footprint',
         'punctate_count',
         'punctate_len_mean',
@@ -189,226 +195,236 @@ def run():
     # TODO remove when you get globals working
     # root_directory = '/home/mitocab/Documents/Box-05282020'
     # regex_string   = '.*_cp_skel_[0-9]*.*'
-    imp = batch_load(root_directory, regex_string)[0]
+    imps = batch_load(root_directory, regex_string)
+
+
+    for o in output_order:
+        outputs[o] = []
    
+    for imp in imps:
 
-    # Store all of the analysis parameters in the table
-    output_parameters["thresholding_op"] = threshold_method
-    output_parameters["use_ridge_detection"] = str(use_ridge_detection)
-    output_parameters["high_contrast"] = rd_max
-    output_parameters["low_contrast"] = rd_min
-    output_parameters["line_width"] = rd_width
-    output_parameters["min_line_length"] = rd_length
+        # Reserve spots for the next image's output data
+        for k, _ in outputs.items():
+            outputs[k].append(None)
 
-
-
-    # Create and ImgPlus copy of the ImagePlus for thresholding with ops...
-    if verbose:
-        IJ.log("Determining threshold level...")
-
-    imp_title = imp.getTitle()
-    slices = imp.getNSlices()
-    frames = imp.getNFrames()
-    output_parameters["image_title"] = imp_title
-    imp_calibration = imp.getCalibration()
-    imp_channel = Duplicator().run(imp, imp.getChannel(), imp.getChannel(), 1, slices, 1, frames)
-    img = ImageJFunctions.wrap(imp_channel)
-
-    # Determine the threshold value if not manual...
-    binary_img = ops.run("threshold.%s"%threshold_method, img)
-    binary = ImageJFunctions.wrap(binary_img, 'binary')
-    binary.setCalibration(imp_calibration)
-    binary.setDimensions(1, slices, 1)
-
-    # Get the total_area
-    if binary.getNSlices() == 1:
-        area = binary.getStatistics(Measurements.AREA).area
-        area_fraction = binary.getStatistics(Measurements.AREA_FRACTION).areaFraction
-        output_parameters["mitochondrial_footprint"] =  area * area_fraction / 100.0
-    else:
-        mito_footprint = 0.0
-        for slice in range(binary.getNSlices()):
-            	binary.setSliceWithoutUpdate(slice)
-                area = binary.getStatistics(Measurements.AREA).area
-                area_fraction = binary.getStatistics(Measurements.AREA_FRACTION).areaFraction
-                mito_footprint += area * area_fraction / 100.0
-        output_parameters["mitochondrial_footprint"] = mito_footprint * imp_calibration.pixelDepth
-
-    # Generate skeleton from masked binary ...
-    # Generate ridges first if using Ridge Detection
-    if use_ridge_detection and (imp.getNSlices() == 1):
-        skeleton = ridge_detect(imp, rd_max, rd_min, rd_width, rd_length)
-    else:
-        skeleton = Duplicator().run(binary)
-        IJ.run(skeleton, "Skeletonize (2D/3D)", "")
-
-    # Analyze the skeleton...
-    if verbose:
-        IJ.log("Setting up skeleton analysis...")
-    skel = AnalyzeSkeleton_()
-    skel.setup("", skeleton)
-    if verbose:
-        IJ.log("Analyzing skeleton...")
-    skel_result = skel.run() # Results from Analyze Skeleton
-                             # (SkeletonResults object) 
-                             # https://javadoc.scijava.org/Fiji/sc/fiji/analyzeSkeleton/SkeletonResult.html
-
-    branch_counts   = skel_result.getBranches()
-    avg_branch_lens = skel_result.getAverageBranchLength()
-
-    punctates, rods, networks, network_branch_count = 0, 0, 0, 0
-    punctate_lens, rod_lens, network_lens = [], [], [] # TODO track indicies instead of copying vals to new lists
-
-    for i in range(len(branch_counts)):
-        if branch_counts[i] == 0:
-            punctates += 1
-            punctate_lens.append(avg_branch_lens[i])
-        elif branch_counts[i] == 1:
-            rods += 1
-            rod_lens.append(avg_branch_lens[i])
-        else:
-            networks += 1
-            network_lens.append(avg_branch_lens[i] * branch_counts[i])
-            network_branch_count += branch_counts[i]
-
-    output_parameters['punctate_count']      = punctates
-    output_parameters['punctate_len_mean']   = average(punctate_lens)
-    output_parameters['punctate_len_med']    = median(punctate_lens)
-    output_parameters['punctate_len_stdevp'] = pstdev(punctate_lens)
-
-    output_parameters['rod_count']      = rods
-    output_parameters['rod_len_mean']   = average(rod_lens)
-    output_parameters['rod_len_med']    = median(rod_lens)
-    output_parameters['rod_len_stdevp'] = pstdev(rod_lens)
-
-    output_parameters['network_count']        = networks
-    output_parameters['network_branch_count'] = network_branch_count
-    output_parameters['network_len_mean']   = average(network_lens, network_branch_count)
-    # output_parameters['network_len_med']    = median(network_lens)
-    # output_parameters['network_len_stdevp'] = pstdev(network_lens)
+        # Store all of the analysis parameters in the table
+        outputs["thresholding_op"][-1] = threshold_method
+        outputs["use_ridge_detection"][-1] = str(use_ridge_detection)
+        outputs["high_contrast"][-1] = rd_max
+        outputs["low_contrast"][-1] = rd_min
+        outputs["line_width"][-1] = rd_width
+        outputs["min_line_length"][-1] = rd_length
 
 
 
-    if verbose:
-        IJ.log("Computing graph based parameters...")
-    branch_lengths = []
-    summed_lengths = []
-    
-    
-    graphs = skel_result.getGraph()
-
-    for graph in graphs:
-        summed_length = 0.0
-        edges = graph.getEdges()
-        for edge in edges:
-            length = edge.getLength()
-            branch_lengths.append(length)
-            summed_length += length
-        summed_lengths.append(summed_length)
-
-
-
-    output_parameters["branch_len_mean"]   = average(branch_lengths)
-    output_parameters["branch_len_med"]    = median(branch_lengths)
-    output_parameters["branch_len_stdevp"] = pstdev(branch_lengths)
-
-    output_parameters["summed_branch_lens_mean"]   = average(summed_lengths)
-    output_parameters["summed_branch_lens_med"]    = median(summed_lengths)
-    output_parameters["summed_branch_lens_stdevp"] = pstdev(summed_lengths)
-
-    branches = list(skel_result.getBranches())
-    output_parameters["network_branches_mean"]   = average(branches)
-    output_parameters["network_branches_med"]    = median(branches)
-    output_parameters["network_branches_stdevp"] = pstdev(branches)
-
-    # Create/append results to a ResultsTable...
-    if verbose:
-        IJ.log("Display results...")
-    if "Mito Morphology" in list(WindowManager.getNonImageTitles()):
-        rt = WindowManager.getWindow("Mito Morphology").getTextPanel().getOrCreateResultsTable()
-    else:
-        rt = ResultsTable()
-
-    rt.incrementCounter()
-    for key in output_order:
-        rt.addValue(key, str(output_parameters[key]))
-
-    # Add user comments intelligently
-    if user_comment != None and user_comment != "":
-        if "=" in user_comment:
-            comments = user_comment.split(",")
-            for comment in comments:
-                rt.addValue(comment.split("=")[0], comment.split("=")[1])
-        else:
-            rt.addValue("Comment", user_comment)
-
-    # rt.show("Mito Morphology") # Do not show in headless mode
-
-	# Create overlays on the original ImagePlus and display them if 2D...
-    if imp.getNSlices() == 1:
+        # Create and ImgPlus copy of the ImagePlus for thresholding with ops...
         if verbose:
-            IJ.log("Generate overlays...")
-        IJ.run(skeleton, "Green", "")
-        IJ.run(binary, "Magenta", "")
+            IJ.log("Determining threshold level...")
 
-        skeleton_ROI = ImageRoi(0,0,skeleton.getProcessor())
-        skeleton_ROI.setZeroTransparent(True)
-        skeleton_ROI.setOpacity(1.0)
-        binary_ROI = ImageRoi(0,0,binary.getProcessor())
-        binary_ROI.setZeroTransparent(True)
-        binary_ROI.setOpacity(0.25)
+        imp_title = imp.getTitle()
+        slices = imp.getNSlices()
+        frames = imp.getNFrames()
+        outputs["image_title"][-1] = imp_title
+        imp_calibration = imp.getCalibration()
+        imp_channel = Duplicator().run(imp, imp.getChannel(), imp.getChannel(), 1, slices, 1, frames)
+        img = ImageJFunctions.wrap(imp_channel)
 
-        overlay = Overlay()
-        overlay.add(binary_ROI)
-        overlay.add(skeleton_ROI)
+        # Determine the threshold value if not manual...
+        binary_img = ops.run("threshold.%s"%threshold_method, img)
+        binary = ImageJFunctions.wrap(binary_img, 'binary')
+        binary.setCalibration(imp_calibration)
+        binary.setDimensions(1, slices, 1)
 
-        imp.setOverlay(overlay)
-        imp.updateAndDraw()
+        # Get the total_area
+        if binary.getNSlices() == 1:
+            area = binary.getStatistics(Measurements.AREA).area
+            area_fraction = binary.getStatistics(Measurements.AREA_FRACTION).areaFraction
+            outputs["mitochondrial_footprint"][-1] =  area * area_fraction / 100.0
+        else:
+            mito_footprint = 0.0
+            for slice in range(binary.getNSlices()):
+                    binary.setSliceWithoutUpdate(slice)
+                    area = binary.getStatistics(Measurements.AREA).area
+                    area_fraction = binary.getStatistics(Measurements.AREA_FRACTION).areaFraction
+                    mito_footprint += area * area_fraction / 100.0
+            outputs["mitochondrial_footprint"][-1] = mito_footprint * imp_calibration.pixelDepth
 
-    '''
-    # Generate a 3D model if a stack
-    if imp.getNSlices() > 1:
+        # Generate skeleton from masked binary ...
+        # Generate ridges first if using Ridge Detection
+        if use_ridge_detection and (imp.getNSlices() == 1):
+            skeleton = ridge_detect(imp, rd_max, rd_min, rd_width, rd_length)
+        else:
+            skeleton = Duplicator().run(binary)
+            IJ.run(skeleton, "Skeletonize (2D/3D)", "")
 
-        univ = Image3DUniverse()
-        univ.show()
+        # Analyze the skeleton...
+        if verbose:
+            IJ.log("Setting up skeleton analysis...")
+        skel = AnalyzeSkeleton_()
+        skel.setup("", skeleton)
+        if verbose:
+            IJ.log("Analyzing skeleton...")
+        skel_result = skel.run() # Results from Analyze Skeleton
+                                # (SkeletonResults object) 
+                                # https://javadoc.scijava.org/Fiji/sc/fiji/analyzeSkeleton/SkeletonResult.html
 
-        pixelWidth = imp_calibration.pixelWidth
-        pixelHeight = imp_calibration.pixelHeight
-        pixelDepth = imp_calibration.pixelDepth
+        branch_counts   = skel_result.getBranches()
+        avg_branch_lens = skel_result.getAverageBranchLength()
 
-        # Add end points in yellow
-        end_points = skel_result.getListOfEndPoints()
-        end_point_list = []
-        for p in end_points:
-            end_point_list.append(Point3f(p.x * pixelWidth, p.y * pixelHeight, p.z * pixelDepth))
-        univ.addIcospheres(end_point_list, Color3f(255.0, 255.0, 0.0), 2, 1*pixelDepth, "endpoints")
+        punctates, rods, networks, network_branch_count = 0, 0, 0, 0
+        punctate_lens, rod_lens, network_lens = [], [], [] # TODO track indicies instead of copying vals to new lists
 
-        # Add junctions in magenta
-        junctions = skel_result.getListOfJunctionVoxels()
-        junction_list = []
-        for p in junctions:
-            junction_list.append(Point3f(p.x * pixelWidth, p.y * pixelHeight, p.z * pixelDepth))
-        univ.addIcospheres(junction_list, Color3f(255.0, 0.0, 255.0), 2, 1*pixelDepth, "junctions")
+        for i in range(len(branch_counts)):
+            if branch_counts[i] == 0:
+                punctates += 1
+                punctate_lens.append(avg_branch_lens[i])
+            elif branch_counts[i] == 1:
+                rods += 1
+                rod_lens.append(avg_branch_lens[i])
+            else:
+                networks += 1
+                network_lens.append(avg_branch_lens[i] * branch_counts[i])
+                network_branch_count += branch_counts[i]
 
-        # Add the lines in green
+        outputs['punctate_count'][-1]      = punctates
+        outputs['punctate_len_mean'][-1]   = average(punctate_lens) if punctates > 0 else 0
+        outputs['punctate_len_med'][-1]    = median(punctate_lens)  if punctates > 0 else 0
+        outputs['punctate_len_stdevp'][-1] = pstdev(punctate_lens)  if punctates > 0 else 0
+
+        outputs['rod_count'][-1]      = rods
+        outputs['rod_len_mean'][-1]   = average(rod_lens) if rods > 0 else 0
+        outputs['rod_len_med'][-1]    = median(rod_lens)  if rods > 0 else 0
+        outputs['rod_len_stdevp'][-1] = pstdev(rod_lens)  if rods > 0 else 0
+
+        outputs['network_count'][-1]        = networks
+        outputs['network_branch_count'][-1] = network_branch_count
+        outputs['network_len_mean'][-1]     = average(network_lens, network_branch_count) if network_branch_count > 0 else 0
+        # outputs['network_len_med'][-1]    = median(network_lens)
+        # outputs['network_len_stdevp'][-1] = pstdev(network_lens)
+
+
+
+        if verbose:
+            IJ.log("Computing graph based parameters...")
+        branch_lengths = []
+        summed_lengths = []
+        
+        
         graphs = skel_result.getGraph()
-        for graph in range(len(graphs)):
-            edges = graphs[graph].getEdges()
-            for edge in range(len(edges)):
-                branch_points = []
-                for p in edges[edge].getSlabs():
-                    branch_points.append(Point3f(p.x * pixelWidth, p.y * pixelHeight, p.z * pixelDepth))
-                univ.addLineMesh(branch_points, Color3f(0.0, 255.0, 0.0), "branch-%s-%s"%(graph, edge), True)
 
-        # Add the surface
-        univ.addMesh(binary)
-        univ.getContent("binary").setTransparency(0.5)
-    '''
+        for graph in graphs:
+            summed_length = 0.0
+            edges = graph.getEdges()
+            for edge in edges:
+                length = edge.getLength()
+                branch_lengths.append(length)
+                summed_length += length
+            summed_lengths.append(summed_length)
 
-    if verbose:
-        IJ.log("Done analysis!")
 
-    return output_parameters
+
+        outputs["branch_len_mean"][-1]   = average(branch_lengths)
+        outputs["branch_len_med"][-1]    = median(branch_lengths)
+        outputs["branch_len_stdevp"][-1] = pstdev(branch_lengths)
+
+        outputs["summed_branch_lens_mean"][-1]  = average(summed_lengths)
+        outputs["summed_branch_lens_med"][-1]    = median(summed_lengths)
+        outputs["summed_branch_lens_stdevp"][-1] = pstdev(summed_lengths)
+
+        branches = list(skel_result.getBranches())
+        outputs["network_branches_mean"][-1]   = average(branches)
+        outputs["network_branches_med"][-1]    = median(branches)
+        outputs["network_branches_stdevp"][-1] = pstdev(branches)
+
+        # Create/append results to a ResultsTable...
+        if verbose:
+            IJ.log("Display results...")
+        if "Mito Morphology" in list(WindowManager.getNonImageTitles()):
+            rt = WindowManager.getWindow("Mito Morphology").getTextPanel().getOrCreateResultsTable()
+        else:
+            rt = ResultsTable()
+
+        
+        rt.incrementCounter()
+        for key in output_order:
+            rt.addValue(key, str(outputs[key][-1]))
+
+        # Add user comments intelligently
+        if user_comment != None and user_comment != "":
+            if "=" in user_comment:
+                comments = user_comment.split(",")
+                for comment in comments:
+                    rt.addValue(comment.split("=")[0], comment.split("=")[1])
+            else:
+                rt.addValue("Comment", user_comment)
+
+        # rt.show("Mito Morphology") # Do not show in headless mode
+
+        # Create overlays on the original ImagePlus and display them if 2D...
+        if imp.getNSlices() == 1:
+            if verbose:
+                IJ.log("Generate overlays...")
+            IJ.run(skeleton, "Green", "")
+            IJ.run(binary, "Magenta", "")
+
+            skeleton_ROI = ImageRoi(0,0,skeleton.getProcessor())
+            skeleton_ROI.setZeroTransparent(True)
+            skeleton_ROI.setOpacity(1.0)
+            binary_ROI = ImageRoi(0,0,binary.getProcessor())
+            binary_ROI.setZeroTransparent(True)
+            binary_ROI.setOpacity(0.25)
+
+            overlay = Overlay()
+            overlay.add(binary_ROI)
+            overlay.add(skeleton_ROI)
+
+            imp.setOverlay(overlay)
+            imp.updateAndDraw()
+
+        '''
+        # Generate a 3D model if a stack
+        if imp.getNSlices() > 1:
+
+            univ = Image3DUniverse()
+            univ.show()
+
+            pixelWidth = imp_calibration.pixelWidth
+            pixelHeight = imp_calibration.pixelHeight
+            pixelDepth = imp_calibration.pixelDepth
+
+            # Add end points in yellow
+            end_points = skel_result.getListOfEndPoints()
+            end_point_list = []
+            for p in end_points:
+                end_point_list.append(Point3f(p.x * pixelWidth, p.y * pixelHeight, p.z * pixelDepth))
+            univ.addIcospheres(end_point_list, Color3f(255.0, 255.0, 0.0), 2, 1*pixelDepth, "endpoints")
+
+            # Add junctions in magenta
+            junctions = skel_result.getListOfJunctionVoxels()
+            junction_list = []
+            for p in junctions:
+                junction_list.append(Point3f(p.x * pixelWidth, p.y * pixelHeight, p.z * pixelDepth))
+            univ.addIcospheres(junction_list, Color3f(255.0, 0.0, 255.0), 2, 1*pixelDepth, "junctions")
+
+            # Add the lines in green
+            graphs = skel_result.getGraph()
+            for graph in range(len(graphs)):
+                edges = graphs[graph].getEdges()
+                for edge in range(len(edges)):
+                    branch_points = []
+                    for p in edges[edge].getSlabs():
+                        branch_points.append(Point3f(p.x * pixelWidth, p.y * pixelHeight, p.z * pixelDepth))
+                    univ.addLineMesh(branch_points, Color3f(0.0, 255.0, 0.0), "branch-%s-%s"%(graph, edge), True)
+
+            # Add the surface
+            univ.addMesh(binary)
+            univ.getContent("binary").setTransparency(0.5)
+        '''
+
+        if verbose:
+            IJ.log("Done analysis!")
+
+    return outputs
 
 # Run the script...
 if (__name__=="__main__") or (__name__=="__builtin__"):
