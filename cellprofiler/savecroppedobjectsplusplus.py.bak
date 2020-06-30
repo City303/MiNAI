@@ -75,17 +75,6 @@ The choices are:
 			)
 		)
 
-		# TODO this is a quick hack please fix me
-                '''
-		self.root_dir = cellprofiler.setting.Text(
-			'DO NOT CLICK',
-			"DO NOT CLICK",
-			doc="""\
-DO NOT CLICK			
-"""
-		)
-                '''
-
 		self.objects_name = cellprofiler.setting.ObjectNameSubscriber(
 			"Objects",
 			doc="Select the objects you want to export as per-object crops."
@@ -240,11 +229,9 @@ of a forward slash (“/”) as a folder separator will avoid ambiguity
 between the various operating systems.
 """.format(**{})
 		)
-                ##################################################
-                ################
-                ##################
-                ##############
+                
                 self.root_dir = self.pathname
+                
 		self.create_subdirectories = cellprofiler.setting.Binary(
 			"Create subfolders in the output folder?",
 			False, doc="""Select "*{YES}*" to create subfolders to match the input image folder structure.""".format(**{
@@ -297,19 +284,10 @@ prompt.""".format(**{
 				filename += suffix
 
 		pathname = self.pathname.get_absolute_path(measurements)
-                print('pathname_old', pathname)
 		if self.create_subdirectories:
 			image_path = self.source_path(workspace)
-                        common_prefix = os.path.commonprefix([pathname, image_path]).rpartition('/')[0]
-			subdir = os.path.relpath(image_path, start=common_prefix)
+			subdir = os.path.relpath(image_path, pathname)
 			pathname = os.path.join(pathname, subdir)
-                        ########################################
-                        ########################################
-                        #######################################
-                        # print('image_path', image_path)
-                        # print('subdir', subdir)
-                        # print('join(pathname, subdir)', pathname)
-                        # print('root_dir.get_abs_path', self.root_dir.get_absolute_path())
 		if len(pathname) and not os.path.isdir(pathname) and make_dirs:
 			try:
 				os.makedirs(pathname)
