@@ -99,8 +99,13 @@ def main(root_path, regex_str, output_path):
                 # it is already Python-ated (because it is a JavaMap and not a dict)
                 # Pandas won't take the raw Pyimagej casting of the dict.
     
-    sort_by_order = lambda kv: OUTPUT_FILTER.index(kv[0])
-    for k, v in sorted(ij_out.items(), key=sort_by_order):
+    # Filter and sort the IJ output dictionary so that only
+    # the columns we want are presented, and in the proper order.
+    filtered_kvs  = list([i for i in ij_out.items() if i[0] in OUTPUT_FILTER]) # key/value pairs
+    sorted_kvs    = sorted(filtered_kvs,                                       # sorted key/value pairs
+                           key = lambda kv: OUTPUT_FILTER.index(kv[0]))                  
+
+    for k, v in sorted_kvs:
         # Format the items so that they are save-able into the CSV
         # (and to potentially re-cast them to their proper types)
         if k in OUTPUT_FILTER:
