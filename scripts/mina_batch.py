@@ -67,7 +67,7 @@ OUTPUT_TITLES = [
 ]
 
 
-def main():
+def main(root_path, regex_str, output_path):
     ij = imagej.init('/home/mitocab/Fiji.app')
     print(ij.getApp().getInfo(True))
 
@@ -76,8 +76,8 @@ def main():
         mina_macro = f.read()
 
     mina_args = {
-        'root_directory': '/home/mitocab/Documents/Box-05282020',
-        'regex_string'  : '.*_cp_skel_[0-9]*.*',
+        'root_directory': root_path,
+        'regex_string'  : regex_str,
         'use_ridge_detection': False,
         'verbose': False,
     }
@@ -106,7 +106,7 @@ def main():
             print(title, ':\n', py_out[title])
 
     df = pd.DataFrame.from_dict(py_out)
-    df.to_csv('/home/mitocab/Documents/output.csv')
+    df.to_csv(output_path)
 
 
 
@@ -116,9 +116,11 @@ Program execution starts here.
 if __name__ == '__main__':
     if len(sys.argv) != 3:
         print('Usage: python mina_batch.py [1] [2]')
-        print('[1]: root directory (i.e. "/home/mitocab/Documents/Box-05282020"')
-        print('[2]: regex to find skeleton files (i.e. ".*_cp_skel_[0-9]*.*"')
+        print('[1]: root directory with skeletons (i.e. "/home/mitocab/Documents/Box-05282020"')
+        print('[2]: regex to find skeleton files  (i.e. ".*_cp_skel_[0-9]*.*"')
+        print('[3]: output directory and name     (i.e. "/home/mitocab/Documents/output.csv"')
 
-    root_dir  = sys.argv[1]
-    regex_str = sys.argv[2]
-    main(root_dir, regex_str)
+    root_path   = sys.argv[1]
+    regex_str   = sys.argv[2]
+    output_path = sys.argv[3]
+    main(root_path, regex_str, output_path)
