@@ -40,10 +40,6 @@
 #@output String summed_branch_lens_mean
 #@output String summed_branch_lens_med
 #@output String summed_branch_lens_stdevp
-
-#@output String network_branches_mean
-#@output String network_branches_med
-#@output String network_branches_stdevp
 '''
 
 '''
@@ -179,9 +175,6 @@ def run():
         'summed_branch_lens_mean',
         'summed_branch_lens_med',
         'summed_branch_lens_stdevp',
-        'network_branches_mean',
-        'network_branches_med',
-        'network_branches_stdevp',
     ]
 
     # TODO remove when you get globals working
@@ -311,11 +304,6 @@ def run():
         outputs["summed_branch_lens_mean"][-1]  = average(summed_lengths)
         outputs["summed_branch_lens_med"][-1]    = median(summed_lengths)
         outputs["summed_branch_lens_stdevp"][-1] = pstdev(summed_lengths)
-
-        branches = list(skel_result.getBranches())
-        outputs["network_branches_mean"][-1]   = average(branches)
-        outputs["network_branches_med"][-1]    = median(branches)
-        outputs["network_branches_stdevp"][-1] = pstdev(branches)
 
         # Create/append results to a ResultsTable...
         if verbose:
