@@ -23,9 +23,6 @@
 #@output String min_line_length
 
 #@output String punctate_count
-#@output String punctate_len_mean
-#@output String punctate_len_med
-#@output String punctate_len_stdevp
 
 #@output String rod_count
 #@output String rod_len_mean
@@ -33,8 +30,8 @@
 #@output String rod_len_stdevp
 
 #@output String network_count
-#@output String network_branch_count
-#@output String network_len_mean
+#@output String network_branches
+#@output String network_branches_mean
 
 #@output String branch_len_mean
 #@output String branch_len_med
@@ -169,18 +166,13 @@ def run():
         'min_line_length',
         'mitochondrial_footprint',
         'punctate_count',
-        'punctate_len_mean',
-        'punctate_len_med',
-        'punctate_len_stdevp',
         'rod_count',
+        'network_count',
         'rod_len_mean',
         'rod_len_med',
         'rod_len_stdevp',
-        'network_count',
-        'network_branch_count',
-        'network_len_mean',
-        # 'network_len_med',
-        # 'network_len_stdevp',
+        'network_branches',
+        'network_branches_mean',
         'branch_len_mean',
         'branch_len_med',
         'branch_len_stdevp',
@@ -197,24 +189,21 @@ def run():
     # regex_string   = '.*_cp_skel_[0-9]*.*'
     imps = batch_load(root_directory, regex_string)
 
-
     for o in output_order:
         outputs[o] = []
    
     for imp in imps:
-
         # Reserve spots for the next image's output data
         for k, _ in outputs.items():
             outputs[k].append(None)
 
         # Store all of the analysis parameters in the table
-        outputs["thresholding_op"][-1] = threshold_method
+        outputs["thresholding_op"][-1]     = threshold_method
         outputs["use_ridge_detection"][-1] = str(use_ridge_detection)
-        outputs["high_contrast"][-1] = rd_max
-        outputs["low_contrast"][-1] = rd_min
-        outputs["line_width"][-1] = rd_width
-        outputs["min_line_length"][-1] = rd_length
-
+        outputs["high_contrast"][-1]       = rd_max
+        outputs["low_contrast"][-1]        = rd_min
+        outputs["line_width"][-1]          = rd_width
+        outputs["min_line_length"][-1]     = rd_length
 
 
         # Create and ImgPlus copy of the ImagePlus for thresholding with ops...
@@ -235,7 +224,7 @@ def run():
         binary.setCalibration(imp_calibration)
         binary.setDimensions(1, slices, 1)
 
-        # Get the total_area
+        # Get the total area (i.e. footprint)
         if binary.getNSlices() == 1:
             area = binary.getStatistics(Measurements.AREA).area
             area_fraction = binary.getStatistics(Measurements.AREA_FRACTION).areaFraction
@@ -271,38 +260,30 @@ def run():
         branch_counts   = skel_result.getBranches()
         avg_branch_lens = skel_result.getAverageBranchLength()
 
-        punctates, rods, networks, network_branch_count = 0, 0, 0, 0
-        punctate_lens, rod_lens, network_lens = [], [], [] # TODO track indicies instead of copying vals to new lists
+        punctates, rods, networks, network_branches = 0, 0, 0, 0
+        rod_lens, network_lens = [], [] # TODO track indicies instead of copying vals to new lists
 
         for i in range(len(branch_counts)):
             if branch_counts[i] == 0:
                 punctates += 1
-                punctate_lens.append(avg_branch_lens[i])
             elif branch_counts[i] == 1:
                 rods += 1
                 rod_lens.append(avg_branch_lens[i])
             else:
                 networks += 1
                 network_lens.append(avg_branch_lens[i] * branch_counts[i])
-                network_branch_count += branch_counts[i]
+                network_branches += branch_counts[i]
 
-        outputs['punctate_count'][-1]      = punctates
-        outputs['punctate_len_mean'][-1]   = average(punctate_lens) if punctates > 0 else 0
-        outputs['punctate_len_med'][-1]    = median(punctate_lens)  if punctates > 0 else 0
-        outputs['punctate_len_stdevp'][-1] = pstdev(punctate_lens)  if punctates > 0 else 0
+        outputs['punctate_count'][-1] = punctates
 
         outputs['rod_count'][-1]      = rods
         outputs['rod_len_mean'][-1]   = average(rod_lens) if rods > 0 else 0
         outputs['rod_len_med'][-1]    = median(rod_lens)  if rods > 0 else 0
         outputs['rod_len_stdevp'][-1] = pstdev(rod_lens)  if rods > 0 else 0
 
-        outputs['network_count'][-1]        = networks
-        outputs['network_branch_count'][-1] = network_branch_count
-        outputs['network_len_mean'][-1]     = average(network_lens, network_branch_count) if network_branch_count > 0 else 0
-        # outputs['network_len_med'][-1]    = median(network_lens)
-        # outputs['network_len_stdevp'][-1] = pstdev(network_lens)
-
-
+        outputs['network_count'][-1]    = networks
+        outputs['network_branches'][-1] = network_branches
+        outputs['network_branches_mean'][-1] = average(network_lens, network_branches) if network_branches > 0 else 0
 
         if verbose:
             IJ.log("Computing graph based parameters...")
