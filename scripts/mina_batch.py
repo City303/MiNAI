@@ -1,5 +1,4 @@
-import os, re, sys, contextlib
-import logging
+import sys
 import imagej
 import pandas as pd
 
@@ -62,8 +61,8 @@ OUTPUT_TITLES = [
     'Rod length median',
     'Rod length population stdev',
     '# of network branches',
-    'Network branches length mean'
-    '# of all branches (networks and rods)'
+    'Network branches length mean',
+    '# of all branches (networks and rods)',
     'All branches length mean',
     'All branches length median',
     'All branches length population stdev',
@@ -97,13 +96,12 @@ def main(root_path, regex_str, output_path):
     ij_out = ij.py.from_java(result.getOutputs())          # Get the outputs
     py_out = {} # Have to manually copy the IJ dictionary to Python, even though
                 # it is already Python-ated (because it is a JavaMap and not a dict)
-                # Pandas won't take the raw Pyimagej casting of the dict.
+                # because Pandas won't take the raw Pyimagej casting of the dict.
     
     # Filter and sort the IJ output dictionary so that only
     # the columns we want are presented, and in the proper order.
-    filtered_kvs  = list([i for i in ij_out.items() if i[0] in OUTPUT_FILTER]) # key/value pairs
-    sorted_kvs    = sorted(filtered_kvs,                                       # sorted key/value pairs
-                           key = lambda kv: OUTPUT_FILTER.index(kv[0]))                  
+    filtered_kvs  = list([kv for kv in ij_out.items() if kv[0] in OUTPUT_FILTER])     # key/value pairs
+    sorted_kvs    = sorted(filtered_kvs, key = lambda kv: OUTPUT_FILTER.index(kv[0])) # sorted key/value pairs       
 
     for k, v in sorted_kvs:
         # Format the items so that they are save-able into the CSV

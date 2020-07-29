@@ -33,13 +33,14 @@
 #@output String network_branches
 #@output String network_branches_mean
 
-#@output String branch_len_mean
-#@output String branch_len_med
-#@output String branch_len_stdevp
+#@output String all_branches
+#@output String all_branches_len_mean
+#@output String all_branches_len_med
+#@output String all_branches_len_stdevp
 
-#@output String summed_branch_lens_mean
-#@output String summed_branch_lens_med
-#@output String summed_branch_lens_stdevp
+#@output String summed_branches_lens_mean
+#@output String summed_branches_lens_med
+#@output String summed_branches_lens_stdevp
 '''
 
 '''
@@ -169,12 +170,13 @@ def run():
         'rod_len_stdevp',
         'network_branches',
         'network_branches_mean',
-        'branch_len_mean',
-        'branch_len_med',
-        'branch_len_stdevp',
-        'summed_branch_lens_mean',
-        'summed_branch_lens_med',
-        'summed_branch_lens_stdevp',
+        'all_branches',
+        'all_branches_len_mean',
+        'all_branches_len_med',
+        'all_branches_len_stdevp',
+        'summed_branches_lens_mean',
+        'summed_branches_lens_med',
+        'summed_branches_lens_stdevp',
     ]
 
     # TODO remove when you get globals working
@@ -256,16 +258,17 @@ def run():
         punctates, rods, networks, network_branches = 0, 0, 0, 0
         rod_lens, network_lens = [], [] # TODO track indicies instead of copying vals to new lists
 
-        for i in range(len(branch_counts)):
-            if branch_counts[i] == 0:
-                punctates += 1
-            elif branch_counts[i] == 1:
-                rods += 1
-                rod_lens.append(avg_branch_lens[i])
-            else:
-                networks += 1
-                network_lens.append(avg_branch_lens[i] * branch_counts[i])
-                network_branches += branch_counts[i]
+        if branch_counts is not None:
+            for i in range(len(branch_counts)):
+                if branch_counts[i] == 0:
+                    punctates += 1
+                elif branch_counts[i] == 1:
+                    rods += 1
+                    rod_lens.append(avg_branch_lens[i])
+                else:
+                    networks += 1
+                    network_lens.append(avg_branch_lens[i] * branch_counts[i])
+                    network_branches += branch_counts[i]
 
         outputs['punctate_count'][-1] = punctates
 
@@ -285,25 +288,27 @@ def run():
         
         
         graphs = skel_result.getGraph()
+        total_num_branches = 0.0
+        if graphs is not None:
+            for graph in graphs:
+                summed_length = 0.0
+                edges = graph.getEdges()
+                for edge in edges:
+                    total_num_branches += 1
+                    length = edge.getLength()
+                    branch_lengths.append(length)
+                    summed_length += length
+                summed_lengths.append(summed_length)
 
-        for graph in graphs:
-            summed_length = 0.0
-            edges = graph.getEdges()
-            for edge in edges:
-                length = edge.getLength()
-                branch_lengths.append(length)
-                summed_length += length
-            summed_lengths.append(summed_length)
 
+        outputs["all_branches"][-1] = total_num_branches
+        outputs["all_branches_len_mean"][-1]   = average(branch_lengths) if len(branch_lengths) > 0 else 0
+        outputs["all_branches_len_med"][-1]    = median(branch_lengths) if len(branch_lengths) > 0 else 0
+        outputs["all_branches_len_stdevp"][-1] = pstdev(branch_lengths) if len(branch_lengths) > 0 else 0
 
-
-        outputs["branch_len_mean"][-1]   = average(branch_lengths)
-        outputs["branch_len_med"][-1]    = median(branch_lengths)
-        outputs["branch_len_stdevp"][-1] = pstdev(branch_lengths)
-
-        outputs["summed_branch_lens_mean"][-1]  = average(summed_lengths)
-        outputs["summed_branch_lens_med"][-1]    = median(summed_lengths)
-        outputs["summed_branch_lens_stdevp"][-1] = pstdev(summed_lengths)
+        outputs["summed_branches_lens_mean"][-1]   = average(summed_lengths) if len(summed_lengths) > 0 else 0
+        outputs["summed_branches_lens_med"][-1]    = median(summed_lengths) if len(summed_lengths) > 0 else 0
+        outputs["summed_branches_lens_stdevp"][-1] = pstdev(summed_lengths) if len(summed_lengths) > 0 else 0
 
         # Create/append results to a ResultsTable...
         if verbose:
