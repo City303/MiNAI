@@ -31,6 +31,26 @@ OUTPUT_ORDER = [
     'summed_branches_lens_stdevp',
 ]
 
+# Outputs that represent lengths (to convert to scale value)
+# TODO can standard deviaiton be converted linearly?
+LENGTH_OUTPUTS = [
+    'rod_len_mean',
+    'rod_len_med',
+    'rod_len_stdevp',
+    'network_branches_mean',
+    'all_branches_len_mean',
+    'all_branches_len_med',
+    'all_branches_len_stdevp',
+    'summed_branches_lens_mean',
+    'summed_branches_lens_med',
+    'summed_branches_lens_stdevp',
+]
+
+# Outputs that represent area (to convert to scale value ^ 2)
+AREA_OUTPUTS = [
+    'mitochondrial_footprint'
+]
+
 OUTPUT_FILTER = [
     'image_title',
     'mitochondrial_footprint',
@@ -72,7 +92,7 @@ OUTPUT_TITLES = [
 ]
 
 
-def main(root_path, regex_str, output_path):
+def main(root_path, regex_str, output_path, pix_to_um_scale=1.0):
     ij = imagej.init('/home/mitocab/Fiji.app')
     print(ij.getApp().getInfo(True))
 
@@ -114,6 +134,17 @@ def main(root_path, regex_str, output_path):
                 if v[i].startswith("u'") or v[i].startswith('u"'):
                     v[i] = v[i][2:]
                 v[i] = v[i].strip('\'\"')
+
+            if k in LENGTH_OUTPUTS:
+                print('K,v length before ', k, v)
+                for i, _ in enumerate(v):
+                    v[i] = float(v[i]) / pix_to_um_scale
+                print('K,v length after ', k,v)
+            elif k in AREA_OUTPUTS:
+                print('K,v area before ', k, v)
+                for i, _ in enumerate(v):
+                    v[i] = float(v[i]) / (pix_to_um_scale**2)
+                print('K,v area after ', k,v)
             
             py_out[title] = v
             print(title, ':\n', py_out[title])
@@ -127,14 +158,19 @@ def main(root_path, regex_str, output_path):
 Program execution starts here.
 '''
 if __name__ == '__main__':
-    if len(sys.argv) != 4:
+    if len(sys.argv) != 4 and len(sys.argv) != 5:
         print('Usage: python mina_batch.py [1] [2]')
         print('[1]: root directory with skeletons (i.e. "/home/mitocab/Documents/Box-05282020"')
         print('[2]: regex to find skeleton files  (i.e. ".*_cp_skel_[0-9]*.*"')
         print('[3]: output directory and name     (i.e. "/home/mitocab/Documents/output.csv"')
+        print('[4] (optional): pixels per micrometer scale (i.e. "4.61" pixels = 1 um')
         sys.exit()
 
     root_path   = sys.argv[1]
     regex_str   = sys.argv[2]
     output_path = sys.argv[3]
-    main(root_path, regex_str, output_path)
+    if len(sys.argv) > 4:
+        pix_to_um_scale = float(sys.argv[4])
+    else:
+        pix_to_um_scale = 1.0
+    main(root_path, regex_str, output_path, pix_to_um_scale)
