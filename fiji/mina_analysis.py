@@ -269,9 +269,9 @@ def run():
         outputs['punctate_count'][-1] = punctates
 
         outputs['rod_count'][-1]      = rods
-        outputs['rod_len_mean'][-1]   = average(rod_lens) if rods > 0 else 0
-        outputs['rod_len_med'][-1]    = median(rod_lens)  if rods > 0 else 0
-        outputs['rod_len_stdevp'][-1] = pstdev(rod_lens)  if rods > 0 else 0
+        outputs['rod_lens_mean'][-1]   = average(rod_lens) if rods > 0 else 0
+        outputs['rod_lens_med'][-1]    = median(rod_lens)  if rods > 0 else 0
+        outputs['rod_lens_stdevp'][-1] = pstdev(rod_lens)  if rods > 0 else 0
 
         outputs['network_count'][-1]    = networks
         outputs['network_num_branches_count'][-1] = network_branches
