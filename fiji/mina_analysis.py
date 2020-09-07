@@ -158,7 +158,7 @@ def run():
         'rod_lens_stdevp',
 
         'network_num_branches_count',
-        'network_num_branches_mean',
+        'network_branch_lens_mean',
         'network_lens_mean',
         'network_lens_median',
         'network_lens_stdevp',
