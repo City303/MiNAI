@@ -14,18 +14,26 @@ OUTPUT_ORDER = [
     'line_width',
     'min_line_length',
     'mitochondrial_footprint',
+    
     'punctate_count',
     'rod_count',
     'network_count',
-    'rod_len_mean',
-    'rod_len_med',
-    'rod_len_stdevp',
-    'network_branches',
-    'network_branches_mean',
+
+    'rod_lens_mean',
+    'rod_lens_med',
+    'rod_lens_stdevp',
+    
+    'network_num_branches_count',
+    'network_branch_lens_mean',
+    'network_lens_mean',
+    'network_lens_median',
+    'network_lens_stdevp',
+
     'all_branches',
-    'all_branches_len_mean',
-    'all_branches_len_med',
-    'all_branches_len_stdevp',
+    'all_branches_lens_mean',
+    'all_branches_lens_med',
+    'all_branches_lens_stdevp',
+
     'summed_branches_lens_mean',
     'summed_branches_lens_med',
     'summed_branches_lens_stdevp',
@@ -37,10 +45,16 @@ LENGTH_OUTPUTS = [
     'rod_len_mean',
     'rod_len_med',
     'rod_len_stdevp',
-    'network_branches_mean',
-    'all_branches_len_mean',
-    'all_branches_len_med',
-    'all_branches_len_stdevp',
+
+    'network_branch_lens_mean',
+    'network_lens_mean',
+    'network_lens_median',
+    'network_lens_stdevp',
+
+    'all_branches_lens_mean',
+    'all_branches_lens_med',
+    'all_branches_lens_stdevp',
+
     'summed_branches_lens_mean',
     'summed_branches_lens_med',
     'summed_branches_lens_stdevp',
@@ -54,18 +68,26 @@ AREA_OUTPUTS = [
 OUTPUT_FILTER = [
     'image_title',
     'mitochondrial_footprint',
+
     'punctate_count',
     'rod_count',
     'network_count',
-    'rod_len_mean',
-    'rod_len_med',
-    'rod_len_stdevp',
-    'network_branches',
-    'network_branches_mean',
+
+    'rod_lens_mean',
+    'rod_lens_med',
+    'rod_lens_stdevp',
+
+    'network_num_branches_count',
+    'network_branch_lens_mean',
+    'network_lens_mean',
+    'network_lens_median',
+    'network_lens_stdevp',
+
     'all_branches',
-    'all_branches_len_mean',
-    'all_branches_len_med',
-    'all_branches_len_stdevp',
+    'all_branches_lens_mean',
+    'all_branches_lens_med',
+    'all_branches_lens_stdevp',
+
     'summed_branches_lens_mean',
     'summed_branches_lens_med',
     'summed_branches_lens_stdevp',
@@ -74,21 +96,28 @@ OUTPUT_FILTER = [
 OUTPUT_TITLES = [
     'Image title',
     'Mitochondrial footprint',
-    '# of punctates',
-    '# of rods',
-    '# of networks',
-    'Rod length mean',
-    'Rod length median',
-    'Rod length population stdev',
-    '# of network branches',
-    'Network branches length mean',
-    '# of all branches (networks and rods)',
-    'All branches length mean',
-    'All branches length median',
-    'All branches length population stdev',
-    'All branched groups mean summed length',
-    'All branched groups median summed length',
-    'All branched groups population stdev summed length'
+
+    'Punctate count',
+    'Rod count',
+    'Network count',
+
+    'Mean rod length',
+    'Median rod length',
+    'Stdev rod length',
+
+    'Network branch count',
+    'Mean network branch length',
+    'Mean network length',
+    'Median network length',
+    'Stdev network length',
+
+    'All branch count',
+    'Mean length of all branches',
+    'Median length of all branches',
+    'Stdev length of all branches',
+    'Mean length of all networks and rods',
+    'Median length of all networks and rods',
+    'Stdev length of all networks and rods',
 ]
 
 

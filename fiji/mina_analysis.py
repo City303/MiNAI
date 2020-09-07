@@ -23,20 +23,23 @@
 #@output String min_line_length
 
 #@output String punctate_count
-
 #@output String rod_count
-#@output String rod_len_mean
-#@output String rod_len_med
-#@output String rod_len_stdevp
-
 #@output String network_count
-#@output String network_branches
-#@output String network_branches_mean
+
+#@output String rod_lens_mean
+#@output String rod_lens_med
+#@output String rod_lens_stdevp
+
+#@output String network_num_branches_count
+#@output String network_num_branches_mean
+#@output String network_lens_mean
+#@output String network_lens_median
+#@output String network_lens_stdevp
 
 #@output String all_branches
-#@output String all_branches_len_mean
-#@output String all_branches_len_med
-#@output String all_branches_len_stdevp
+#@output String all_branches_lens_mean
+#@output String all_branches_lens_med
+#@output String all_branches_lens_stdevp
 
 #@output String summed_branches_lens_mean
 #@output String summed_branches_lens_med
@@ -134,23 +137,6 @@ def batch_load(root_dir, regex_str):
 # The run function..............................................................
 def run():
 
-    # outputs = {"image title" : "",
-    # "thresholding op" : float,
-    # "use ridge detection" : bool,
-    # "high contrast" : int,
-    # "low contrast" : int,
-    # "line width" : int,
-    # "minimum line length" : int,
-    # "mitochondrial footprint" : float,
-    # "branch length mean" : float,
-    # "branch length median" : float,
-    # "branch length stdevp" : float,
-    # "summed branch lengths mean" : float,
-    # "summed branch lengths median" : float,
-    # "summed branch lengths stdevp" : float,
-    # "network branches mean" : float,
-    # "network branches median" : float,
-    # "network branches stdevp" : float}
     outputs = {}
 
     output_order = [
@@ -162,18 +148,26 @@ def run():
         'line_width',
         'min_line_length',
         'mitochondrial_footprint',
+
         'punctate_count',
         'rod_count',
         'network_count',
-        'rod_len_mean',
-        'rod_len_med',
-        'rod_len_stdevp',
-        'network_branches',
-        'network_branches_mean',
+
+        'rod_lens_mean',
+        'rod_lens_med',
+        'rod_lens_stdevp',
+
+        'network_num_branches_count',
+        'network_num_branches_mean',
+        'network_lens_mean',
+        'network_lens_median',
+        'network_lens_stdevp',
+
         'all_branches',
-        'all_branches_len_mean',
-        'all_branches_len_med',
-        'all_branches_len_stdevp',
+        'all_branches_lens_mean',
+        'all_branches_lens_med',
+        'all_branches_lens_stdevp',
+
         'summed_branches_lens_mean',
         'summed_branches_lens_med',
         'summed_branches_lens_stdevp',
@@ -280,8 +274,11 @@ def run():
         outputs['rod_len_stdevp'][-1] = pstdev(rod_lens)  if rods > 0 else 0
 
         outputs['network_count'][-1]    = networks
-        outputs['network_branches'][-1] = network_branches
-        outputs['network_branches_mean'][-1] = average(network_lens, network_branches) if network_branches > 0 else 0
+        outputs['network_num_branches_count'][-1] = network_branches
+        outputs['network_branch_lens_mean'][-1]   = average(network_lens, network_branches) if network_branches > 0 else 0
+        outputs['network_lens_mean'][-1]   = average(network_lens) if networks > 0 else 0
+        outputs['network_lens_median'][-1] = median(network_lens) if networks > 0 else 0
+        outputs['network_lens_stdevp'][-1] = pstdev(network_lens) if networks > 0 else 0
 
         if verbose:
             IJ.log("Computing graph based parameters...")
@@ -304,9 +301,9 @@ def run():
 
 
         outputs["all_branches"][-1] = total_num_branches
-        outputs["all_branches_len_mean"][-1]   = average(branch_lengths) if len(branch_lengths) > 0 else 0
-        outputs["all_branches_len_med"][-1]    = median(branch_lengths) if len(branch_lengths) > 0 else 0
-        outputs["all_branches_len_stdevp"][-1] = pstdev(branch_lengths) if len(branch_lengths) > 0 else 0
+        outputs["all_branches_lens_mean"][-1]   = average(branch_lengths) if len(branch_lengths) > 0 else 0
+        outputs["all_branches_lens_med"][-1]    = median(branch_lengths) if len(branch_lengths) > 0 else 0
+        outputs["all_branches_lens_stdevp"][-1] = pstdev(branch_lengths) if len(branch_lengths) > 0 else 0
 
         outputs["summed_branches_lens_mean"][-1]   = average(summed_lengths) if len(summed_lengths) > 0 else 0
         outputs["summed_branches_lens_med"][-1]    = median(summed_lengths) if len(summed_lengths) > 0 else 0
