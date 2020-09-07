@@ -141,7 +141,6 @@ def main(root_path, regex_str, output_path, pix_to_um_scale=1.0):
         'use_ridge_detection': False,
         'verbose': False,
     }
-    # print(len(mina_macro))
 
     # Print the number of matches with the regex you provided.
     rgx       = re.compile(regex_str)
@@ -150,12 +149,11 @@ def main(root_path, regex_str, output_path, pix_to_um_scale=1.0):
         for file in files:
             if rgx.match(file):
                 match_cnt += 1
-    print(f'    Number of matches: {match_cnt}')
-
 
     print('Calling MiNAI macro with args...')
-    print(f'    Root directory: {root_path}')
-    print(f'    Regex string  : {regex_str}')
+    print('    Root directory   :', root_path)
+    print('    Regex string     :', regex_str)
+    print('    Number of matches:', match_cnt)
     result = ij.py.run_script('py', mina_macro, mina_args) # Run MiNA on the IJ module
     ij_out = ij.py.from_java(result.getOutputs())          # Get the outputs
     py_out = {} # Have to manually copy the IJ dictionary to Python, even though
