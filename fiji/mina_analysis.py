@@ -300,7 +300,8 @@ def run():
                     length = edge.getLength()
                     branch_lengths.append(length)
                     summed_length += length
-                summed_lengths.append(summed_length)
+                if summed_length > 0.0: # Eliminate punctates
+                    summed_lengths.append(summed_length)
 
 
         outputs["all_branches"][-1] = total_num_branches
