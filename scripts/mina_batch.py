@@ -1,5 +1,5 @@
 import sys
-import re
+import os, re
 import imagej
 import pandas as pd
 
