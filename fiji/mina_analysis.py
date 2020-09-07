@@ -220,6 +220,8 @@ def run():
         binary.setDimensions(1, slices, 1)
 
         # Get the total area (i.e. footprint)
+        # TODO is this borked? The code in the MiNA paper (ijm code) is incorrect
+        # as it fundamentally calculates the wrong thing.
         if binary.getNSlices() == 1:
             area = binary.getStatistics(Measurements.AREA).area
             area_fraction = binary.getStatistics(Measurements.AREA_FRACTION).areaFraction
