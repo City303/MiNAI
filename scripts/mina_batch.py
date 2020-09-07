@@ -24,6 +24,7 @@ OUTPUT_ORDER = [
     'rod_lens_stdevp',
     
     'network_num_branches_count',
+    'network_num_branches_mean',
     'network_branch_lens_mean',
     'network_lens_mean',
     'network_lens_median',
@@ -78,6 +79,7 @@ OUTPUT_FILTER = [
     'rod_lens_stdevp',
 
     'network_num_branches_count',
+    'network_num_branches_mean',
     'network_branch_lens_mean',
     'network_lens_mean',
     'network_lens_median',
@@ -105,7 +107,8 @@ OUTPUT_TITLES = [
     'Median rod length',
     'Stdev rod length',
 
-    'Network branch count',
+    'Total network branch count',
+    'Mean network branch count',
     'Mean network branch length',
     'Mean network length',
     'Median network length',
@@ -115,9 +118,10 @@ OUTPUT_TITLES = [
     'Mean length of all branches',
     'Median length of all branches',
     'Stdev length of all branches',
-    'Mean length of all networks and rods',
-    'Median length of all networks and rods',
-    'Stdev length of all networks and rods',
+    
+    'Mean network and rod length',
+    'Median network and rod length',
+    'Stdev network and rod length',
 ]
 
 

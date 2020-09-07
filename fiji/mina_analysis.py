@@ -158,6 +158,7 @@ def run():
         'rod_lens_stdevp',
 
         'network_num_branches_count',
+        'network_num_branches_mean'
         'network_branch_lens_mean',
         'network_lens_mean',
         'network_lens_median',
@@ -275,6 +276,7 @@ def run():
 
         outputs['network_count'][-1]    = networks
         outputs['network_num_branches_count'][-1] = network_branches
+        outputs['network_num_branches_mean'][-1]  = network_branches / networks if networks > 0 else 0
         outputs['network_branch_lens_mean'][-1]   = average(network_lens, network_branches) if network_branches > 0 else 0
         outputs['network_lens_mean'][-1]   = average(network_lens) if networks > 0 else 0
         outputs['network_lens_median'][-1] = median(network_lens) if networks > 0 else 0
