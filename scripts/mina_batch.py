@@ -142,6 +142,16 @@ def main(root_path, regex_str, output_path, pix_to_um_scale=1.0):
     }
     # print(len(mina_macro))
 
+    # Print the number of matches with the regex you provided.
+    rgx       = re.compile(regex_str)
+    match_cnt = 0
+    for subdir, dirs, files in os.walk(root_path):
+        for file in files:
+            if rgx.match(file):
+                match_cnt += 1
+    print(f'    Number of matches: {match_cnt}')
+
+
     print('Calling MiNAI macro with args...')
     print(f'    Root directory: {root_path}')
     print(f'    Regex string  : {regex_str}')
