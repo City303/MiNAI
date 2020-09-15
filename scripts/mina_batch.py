@@ -126,8 +126,8 @@ OUTPUT_TITLES = [
 ]
 
 
-def main(root_path, regex_str, output_path, pix_to_um_scale=1.0):
-    ij = imagej.init('/home/mitocab/Fiji.app')
+def main(fiji_exec_path, root_path, regex_str, output_path, pix_to_um_scale=1.0):
+    ij = imagej.init(fiji_exec_path) # /home/mitocab/Fiji.app
     print(ij.getApp().getInfo(True))
 
     # Load mina_analysis macro
@@ -215,4 +215,4 @@ if __name__ == '__main__':
         pix_to_um_scale = float(sys.argv[4])
     else:
         pix_to_um_scale = 1.0
-    main(root_path, regex_str, output_path, pix_to_um_scale)
+    main('/home/mitocab/Fiji.app', root_path, regex_str, output_path, pix_to_um_scale)
