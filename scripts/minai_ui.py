@@ -17,6 +17,7 @@ def run_mina(fiji_dir, skeleton_dir, regex_str, out_folder, out_file, pix_um_sca
 
     if pix_um_scale == '':
         pix_um_scale = 1.0
+    pix_um_scale = float(pix_um_scale)
 
     def mb_wrapper(fiji_dir, skeleton_dir, regex_str, out_path, pix_um_scale):
         mina_batch.main(fiji_dir, skeleton_dir, regex_str, out_path, pix_um_scale)
@@ -33,7 +34,7 @@ def run_mina(fiji_dir, skeleton_dir, regex_str, out_folder, out_file, pix_um_sca
 
     th = threading.Thread(
         target=mb_wrapper, 
-        args=(fiji_dir, skeleton_dir, regex_str, os.path.join(out_folder, out_file), float(pix_um_scale)),
+        args=(fiji_dir, skeleton_dir, regex_str, os.path.join(out_folder, out_file), pix_um_scale),
         daemon=True
     )
     th.start()
@@ -94,7 +95,7 @@ def main():
     menu_def = [ ['&Help', ['&Documentation', '&About']]]
 
     layout = [ [sg.Menu(menu_def)],
-               [sg.Text('Select FIJI directory',  size=(TEXT_WIDTH,1)), sg.Input(),              sg.FolderBrowse(),              sg.Button('?', key='?Fiji')] ,
+               [sg.Text('Select FIJI directory',  size=(TEXT_WIDTH,1)), sg.Input(),             sg.FolderBrowse(),              sg.Button('?', key='?Fiji')] ,
                [sg.Text('Select skeleton folder', size=(TEXT_WIDTH,1)), sg.Input(),             sg.FolderBrowse(),            sg.Button('?', key='?SkeletonFolder')],
                [sg.Text('Regex string',           size=(TEXT_WIDTH,1)), sg.InputText('.*'),                                   sg.Button('?', key='?Regex')],
                [sg.Text('Select output folder',   size=(TEXT_WIDTH,1)), sg.Input(),             sg.FolderBrowse(),            sg.Button('?', key='?OutputDir')],
