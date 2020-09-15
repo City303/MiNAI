@@ -5,7 +5,24 @@ import os
 import threading
 
 def run_mina(fiji_dir, skeleton_dir, regex_str, out_folder, out_file, pix_um_scale):
-    '''
+    '''Calls the mina_batch.py script with the given parameters,
+    along with a callback to inform you the program has completed.
+
+    Parameters:
+        fiji_dir:     string
+            - A path pointing to the install folder for FIJI (with the Jython plugin installed).
+        skeleton_dir: string
+            - A path pointing to where the mitochondrial skeletons can be found
+        regex_str:    string
+            - A Python regular expression filtering files in the skeleton_dir so that only
+              the desired skeleton images will be parsed (assuming they all follow a common
+              file name type)
+        out_folder:   string
+            - A path pointing to where the output csv file will be saved
+        out_file:     string
+            - A filename for the output file (should end in .csv)
+        pix_um_scale: string or float
+            - A value representing the amount of micrometer equal to one pixel.
     '''
     print('Fiji executable dir :', fiji_dir)
     print('Input directory     :', skeleton_dir)
@@ -17,14 +34,15 @@ def run_mina(fiji_dir, skeleton_dir, regex_str, out_folder, out_file, pix_um_sca
 
     if pix_um_scale == '':
         pix_um_scale = 1.0
-    pix_um_scale = float(pix_um_scale)
+    else:
+        pix_um_scale = float(pix_um_scale)
 
     def mb_wrapper(fiji_dir, skeleton_dir, regex_str, out_path, pix_um_scale):
         mina_batch.main(fiji_dir, skeleton_dir, regex_str, out_path, pix_um_scale)
 
         # Display the "Done!" window
-        done_layout = [ sg.Text('Batch processing done!') ]
-        done_window = sg.Window('MiNAI', done_layout)
+        done_layout = [ [sg.Text('Batch processing done!')] ]
+        done_window = sg.Window('Update', done_layout)
 
         while True:
             event, vaules = done_window.read()
@@ -40,16 +58,48 @@ def run_mina(fiji_dir, skeleton_dir, regex_str, out_folder, out_file, pix_um_sca
     th.start()
 
 def open_docs():
-    '''
+    '''Opens the GitHub wiki so a user can read about how the program works.
     '''
     webbrowser.open('https://github.com/City303/MiNAI/wiki')
 
 def about_window():
+    '''Opens an about window to give credit to the authors / paper.
     '''
+    about_layout = [ [sg.Text('MiNAI')],
+                     [sg.Text('By Benjamin Lowe, Carson Molder and some other people')]]
+    about_window = sg.Window('About MiNAI', about_layout)
+
+    while True:
+        event, vaules = about_window.read()
+        if event == sg.WIN_CLOSED:
+            break
+
+
+def help_fijidir():
+    '''Opens a window explaining what the FIJI executable directory is,
+    and that Jython needs to be installed.
     '''
-    layout = [ [sg.Text('MiNAI')],
-               [sg.Text('By Benjamin Lowe, Carson Molder and some other people')]]
-    about_window = sg.Window('About MiNAI', layout)
+    help_layout = [ [sg.Text('Click "Browse" and navigate to where Fiji is installed on your computer.')],
+                    [sg.Text('For example, it may be:')],
+                    [sg.Text('    Windows: C:\\Users\\{your username}\\Fiji.app')],
+                    [sg.Text('    Linux: /home/{your username}/fiji.app')],
+                    [sg.Text('Also, make sure the Jython plugin is installed in your Fiji installation for MiNAI to work.')]]
+    help_window = sg.Window('Help', help_layout)
+    
+    while True:
+        event, vaules = help_window.read()
+        print(event)
+        if event == sg.WIN_CLOSED:
+            break
+
+def help_skeletonfolder():
+    '''Opens a window explaining what the skeleton folder is, what it
+    should include, and why you should use the skeleton pipeline in
+    CellProfiler to generate them.
+    '''
+    help_layout = [ [sg.Text('')],
+                    [sg.Text('')]]
+    help_window = sg.Window('Help', help_layout)
 
     while True:
         event, vaules = about_window.read()
@@ -57,36 +107,58 @@ def about_window():
         if event == sg.WIN_CLOSED:
             break
 
-
-def help_fijidir():
-    '''
-    '''
-    pass
-
-def help_skeletonfolder():
-    '''
-    '''
-    pass
-
 def help_regexstr():
+    '''Opens a window explaining what the regular expression is, along
+    with a link to the Python guide for them.
     '''
-    '''
-    pass
+    help_layout = [ [sg.Text('')],
+                    [sg.Text('')]]
+    help_window = sg.Window('Help', help_layout)
+
+    while True:
+        event, vaules = about_window.read()
+        print(event)
+        if event == sg.WIN_CLOSED:
+            break
 
 def help_outputdir():
+    '''Opens a window explaining what the output directory is.
     '''
-    '''
-    pass
+    help_layout = [ [sg.Text('')],
+                    [sg.Text('')]]
+    help_window = sg.Window('Help', help_layout)
+
+    while True:
+        event, vaules = about_window.read()
+        print(event)
+        if event == sg.WIN_CLOSED:
+            break
 
 def help_outputfile():
+    '''Opens a window explaining what the output file is.
     '''
-    '''
-    pass
+    help_layout = [ [sg.Text('')],
+                    [sg.Text('')]]
+    help_window = sg.Window('Help', help_layout)
+
+    while True:
+        event, vaules = about_window.read()
+        print(event)
+        if event == sg.WIN_CLOSED:
+            break
 
 def help_pixumscale():
+    '''Opens a window explaining what the 1 px = ? um scale is.
     '''
-    '''
-    pass
+    help_layout = [ [sg.Text('')],
+                    [sg.Text('')]]
+    help_window = sg.Window('Help', help_layout)
+
+    while True:
+        event, vaules = about_window.read()
+        print(event)
+        if event == sg.WIN_CLOSED:
+            break
 
 
 def main():
