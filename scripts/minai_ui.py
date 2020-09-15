@@ -1,4 +1,4 @@
-import PySimpleGUI as sg
+import PySimpleGUIQt as sg
 import webbrowser
 import mina_batch
 import os
@@ -70,7 +70,7 @@ def about_window():
     about_window = sg.Window('About MiNAI', about_layout)
 
     while True:
-        event, vaules = help_window.read()
+        event, vaules = about_window.read()
         if event == sg.WIN_CLOSED:
             break
 
@@ -79,10 +79,10 @@ def help_fijidir():
     '''Opens a window explaining what the FIJI executable directory is,
     and that Jython needs to be installed.
     '''
-    help_layout = [ [sg.Text('Click "Browse" and navigate to where Fiji is installed on your computer.')],
+    help_layout = [ [sg.Text('Click "Browse" and select the folder Fiji is installed on your computer.')],
                     [sg.Text('For example, it may be:')],
-                    [sg.Text('    Windows: C:\\Users\\{your username}\\Fiji.app')],
-                    [sg.Text('    Linux: /home/{your username}/fiji.app')],
+                    [sg.Text('    Windows: C:\\Users\\{your username}\\Fiji.app\\')],
+                    [sg.Text('    Linux:   /home/{your username}/Fiji.app/')],
                     [sg.Text('Also, make sure the Jython plugin is installed in your Fiji installation for MiNAI to work.')]]
     help_window = sg.Window('Help', help_layout)
     
@@ -162,18 +162,20 @@ def help_pixumscale():
 
 
 def main():
-    TEXT_WIDTH = 18
+    TEXT_WIDTH = 16
+
+    sg.set_options(font='Cantarell 12')
 
     menu_def = [ ['&Help', ['&Documentation', '&About']]]
 
     layout = [ [sg.Menu(menu_def)],
-               [sg.Text('Select FIJI directory',  size=(TEXT_WIDTH,1)), sg.Input(),             sg.FolderBrowse(),              sg.Button('?', key='?Fiji')] ,
-               [sg.Text('Select skeleton folder', size=(TEXT_WIDTH,1)), sg.Input(),             sg.FolderBrowse(),            sg.Button('?', key='?SkeletonFolder')],
-               [sg.Text('Regex string',           size=(TEXT_WIDTH,1)), sg.InputText('.*'),                                   sg.Button('?', key='?Regex')],
-               [sg.Text('Select output folder',   size=(TEXT_WIDTH,1)), sg.Input(),             sg.FolderBrowse(),            sg.Button('?', key='?OutputDir')],
-               [sg.Text('Output file name',       size=(TEXT_WIDTH,1)), sg.Input('output.csv'),                               sg.Button('?', key='?OutputFile')],
-               [sg.Text('1 pix = ? um',           size=(TEXT_WIDTH,1)), sg.InputText(),         sg.Button('?', key='?Scale'), sg.Text('(optional)')],
-               [sg.Button('Run'), sg.Button('Quit')] ]
+               [sg.Text('Select FIJI directory',  size=(TEXT_WIDTH,1)), sg.Input(size=(2*TEXT_WIDTH,0.85)),               sg.FolderBrowse(size=(10,0.9)), sg.Button('?', key='?Fiji', size=(4,0.9))] ,
+               [sg.Text('Select skeleton folder', size=(TEXT_WIDTH,1)), sg.Input(size=(2*TEXT_WIDTH,0.85)),               sg.FolderBrowse(size=(10,0.9)), sg.Button('?', key='?SkeletonFolder', size=(4,0.9))],
+               [sg.Text('Regex string',           size=(TEXT_WIDTH,1)), sg.InputText('.*', size=(2*TEXT_WIDTH,0.85)),                                     sg.Button('?', key='?Regex', size=(4,0.9))],
+               [sg.Text('Select output folder',   size=(TEXT_WIDTH,1)), sg.Input(size=(2*TEXT_WIDTH,0.85)),               sg.FolderBrowse(size=(10,0.9)), sg.Button('?', key='?OutputDir', size=(4,0.9))],
+               [sg.Text('Output file name',       size=(TEXT_WIDTH,1)), sg.Input('output.csv', size=(2*TEXT_WIDTH,0.85)),                                 sg.Button('?', key='?OutputFile', size=(4,0.9))],
+               [sg.Text('1 pix = ? um',           size=(TEXT_WIDTH,1)), sg.InputText(size=(2*TEXT_WIDTH,0.85)),           sg.Button('?', key='?Scale', size=(4,0.9)),   sg.Text('(optional)')],
+               [sg.Button('Run', size=(15,0.9)), sg.Button('Quit', size=(15,0.9))] ]
 
     window = sg.Window('MiNAI', layout)
 
