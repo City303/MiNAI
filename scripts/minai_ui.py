@@ -33,7 +33,7 @@ def run_mina(fiji_dir, skeleton_dir, regex_str, out_folder, out_file, pix_um_sca
 
     th = threading.Thread(
         target=mb_wrapper, 
-        args=(fiji_dir, skeleton_dir, regex_str, os.path.join(out_folder, out_file), pix_um_scale),
+        args=(fiji_dir, skeleton_dir, regex_str, os.path.join(out_folder, out_file), float(pix_um_scale)),
         daemon=True
     )
     th.start()
