@@ -4,10 +4,10 @@ import mina_batch
 import os
 import threading
 
-def run_mina(fiji_exec, skeleton_dir, regex_str, out_folder, out_file, pix_um_scale):
+def run_mina(fiji_dir, skeleton_dir, regex_str, out_folder, out_file, pix_um_scale):
     '''
     '''
-    print('Fiji executable path:', fiji_exec)
+    print('Fiji executable dir :', fiji_dir)
     print('Input directory     :', skeleton_dir)
     print('Regex string        :', regex_str)
     print('Output directory    :', out_folder)
@@ -18,9 +18,10 @@ def run_mina(fiji_exec, skeleton_dir, regex_str, out_folder, out_file, pix_um_sc
     if pix_um_scale == '':
         pix_um_scale = 1.0
 
-    def mb_wrapper(fiji_exec, skeleton_dir, regex_str, out_path, pix_um_scale):
-        mina_batch.main(fiji_exec, skeleton_dir, regex_str, out_path, pix_um_scale)
+    def mb_wrapper(fiji_dir, skeleton_dir, regex_str, out_path, pix_um_scale):
+        mina_batch.main(fiji_dir, skeleton_dir, regex_str, out_path, pix_um_scale)
 
+        # Display the "Done!" window
         layout = [ sg.Text('Batch processing done!') ]
         complete_window = sg.Window('MiNAI', layout)
 
@@ -32,7 +33,7 @@ def run_mina(fiji_exec, skeleton_dir, regex_str, out_folder, out_file, pix_um_sc
 
     th = threading.Thread(
         target=mb_wrapper, 
-        args=(fiji_exec, skeleton_dir, regex_str, os.path.join(out_folder, out_file), pix_um_scale),
+        args=(fiji_dir, skeleton_dir, regex_str, os.path.join(out_folder, out_file), pix_um_scale),
         daemon=True
     )
     th.start()
@@ -56,7 +57,7 @@ def about_window():
             break
 
 
-def help_fijiexec():
+def help_fijidir():
     '''
     '''
     pass
@@ -93,7 +94,7 @@ def main():
     menu_def = [ ['&Help', ['&Documentation', '&About']]]
 
     layout = [ [sg.Menu(menu_def)],
-               [sg.Text('Select FIJI executable', size=(TEXT_WIDTH,1)), sg.Input(),             sg.FileBrowse(),              sg.Button('?', key='?Fiji')] ,
+               [sg.Text('Select FIJI directory',  size=(TEXT_WIDTH,1)), sg.Input(),              sg.FolderBrowse(),              sg.Button('?', key='?Fiji')] ,
                [sg.Text('Select skeleton folder', size=(TEXT_WIDTH,1)), sg.Input(),             sg.FolderBrowse(),            sg.Button('?', key='?SkeletonFolder')],
                [sg.Text('Regex string',           size=(TEXT_WIDTH,1)), sg.InputText('.*'),                                   sg.Button('?', key='?Regex')],
                [sg.Text('Select output folder',   size=(TEXT_WIDTH,1)), sg.Input(),             sg.FolderBrowse(),            sg.Button('?', key='?OutputDir')],
@@ -115,7 +116,7 @@ def main():
         elif event == 'Run':
             run_mina(values[1], values[2], values[3], values[4], values[5], values[6])
         elif event == '?Fiji':
-            help_fijiexec()
+            help_fijidir()
         elif event == '?SkeletonFolder':
             help_skeletonfolder()
         elif event == '?Regex':
