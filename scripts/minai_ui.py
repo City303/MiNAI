@@ -22,11 +22,11 @@ def run_mina(fiji_dir, skeleton_dir, regex_str, out_folder, out_file, pix_um_sca
         mina_batch.main(fiji_dir, skeleton_dir, regex_str, out_path, pix_um_scale)
 
         # Display the "Done!" window
-        layout = [ sg.Text('Batch processing done!') ]
-        complete_window = sg.Window('MiNAI', layout)
+        done_layout = [ sg.Text('Batch processing done!') ]
+        done_window = sg.Window('MiNAI', done_layout)
 
         while True:
-            event, vaules = about_window.read()
+            event, vaules = done_window.read()
             print(event)
             if event == sg.WIN_CLOSED:
                 break
