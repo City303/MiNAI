@@ -70,7 +70,7 @@ def about_window():
     about_window = sg.Window('About MiNAI', about_layout)
 
     while True:
-        event, vaules = about_window.read()
+        event, vaules = help_window.read()
         if event == sg.WIN_CLOSED:
             break
 
@@ -102,7 +102,7 @@ def help_skeletonfolder():
     help_window = sg.Window('Help', help_layout)
 
     while True:
-        event, vaules = about_window.read()
+        event, vaules = help_window.read()
         print(event)
         if event == sg.WIN_CLOSED:
             break
@@ -116,7 +116,7 @@ def help_regexstr():
     help_window = sg.Window('Help', help_layout)
 
     while True:
-        event, vaules = about_window.read()
+        event, vaules = help_window.read()
         print(event)
         if event == sg.WIN_CLOSED:
             break
@@ -129,7 +129,7 @@ def help_outputdir():
     help_window = sg.Window('Help', help_layout)
 
     while True:
-        event, vaules = about_window.read()
+        event, vaules = help_window.read()
         print(event)
         if event == sg.WIN_CLOSED:
             break
@@ -142,7 +142,7 @@ def help_outputfile():
     help_window = sg.Window('Help', help_layout)
 
     while True:
-        event, vaules = about_window.read()
+        event, vaules = help_window.read()
         print(event)
         if event == sg.WIN_CLOSED:
             break
@@ -155,7 +155,7 @@ def help_pixumscale():
     help_window = sg.Window('Help', help_layout)
 
     while True:
-        event, vaules = about_window.read()
+        event, vaules = help_window.read()
         print(event)
         if event == sg.WIN_CLOSED:
             break
