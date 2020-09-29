@@ -1,9 +1,8 @@
-import sys
-import os, re
+import sys, os, re, argparse
 import imagej
 import pandas as pd
 
-MACRO_PATH  = os.path.realpath('../fiji/mina_analysis.py')
+MACRO_PATH  = os.path.realpath('../fiji/mcp_analysis.py')
 
 OUTPUT_ORDER = [
     'image_title',
@@ -129,14 +128,14 @@ def main(fiji_exec_path, root_path, regex_str, output_path, pix_to_um_scale=1.0)
     ij = imagej.init(fiji_exec_path) # /home/mitocab/Fiji.app
     print(ij.getApp().getInfo(True))
 
-    # Load mina_analysis macro
-    print('Reading MiNAI macro file at:')
+    # Load mcp_analysis macro
+    print('Reading MitoCellPhe macro file at:')
     print(f'    {MACRO_PATH}')
 
     with open(MACRO_PATH, 'r') as f:
-        mina_macro = f.read()
+        mcp_macro = f.read()
 
-    mina_args = {
+    mcp_args = {
         'root_directory': root_path,
         'regex_string'  : regex_str,
         'use_ridge_detection': False,
@@ -151,12 +150,12 @@ def main(fiji_exec_path, root_path, regex_str, output_path, pix_to_um_scale=1.0)
             if rgx.match(file):
                 match_cnt += 1
 
-    print('Calling MiNAI macro with args...')
+    print('Calling MitoCellPhe macro with args...')
     print('    Root directory   :', root_path)
     print('    Regex string     :', regex_str)
     print('    Number of matches:', match_cnt)
-    result = ij.py.run_script('py', mina_macro, mina_args) # Run MiNA on the IJ module
-    ij_out = ij.py.from_java(result.getOutputs())          # Get the outputs
+    result = ij.py.run_script('py', mcp_macro, mcp_macro) # Run MitoCellPhe on the IJ module
+    ij_out = ij.py.from_java(result.getOutputs())         # Get the outputs
     py_out = {} # Have to manually copy the IJ dictionary to Python, even though
                 # it is already Python-ated (because it is a JavaMap and not a dict)
                 # because Pandas won't take the raw Pyimagej casting of the dict.
@@ -201,19 +200,19 @@ def main(fiji_exec_path, root_path, regex_str, output_path, pix_to_um_scale=1.0)
 Program execution starts here.
 '''
 if __name__ == '__main__':
-    if len(sys.argv) != 4 and len(sys.argv) != 5:
-        print('Usage: python mina_batch.py [1] [2]')
-        print('[1]: root directory with skeletons (i.e. "/home/mitocab/Documents/Box-05282020"')
-        print('[2]: regex to find skeleton files  (i.e. ".*_cp_skel_[0-9]*.*"')
-        print('[3]: output directory and name     (i.e. "/home/mitocab/Documents/output.csv"')
-        print('[4] (optional): pixels per micrometer scale (i.e. "4.61" pixels = 1 um')
-        sys.exit()
+    parser = argparse.ArgumentParser(description='MitoCellPhe batch processing')
 
-    root_path   = sys.argv[1]
-    regex_str   = sys.argv[2]
-    output_path = sys.argv[3]
-    if len(sys.argv) > 4:
-        pix_to_um_scale = float(sys.argv[4])
-    else:
-        pix_to_um_scale = 1.0
-    main('/home/mitocab/Fiji.app', root_path, regex_str, output_path, pix_to_um_scale)
+    parser.add_argument('-f', '--fiji', required=True, type=str, 
+                        help='Fiji install directory (i.e. "/home/user/Fiji.app")')
+    parser.add_argument('-d', '--dir', required=True, type=str, 
+                        help='Root directory with skeletons (i.e. "/home/user/Documents/skels"')
+    parser.add_argument('-o', '--output', required=True, type=str, 
+                        help='Output .csv file path (i.e. "/home/user/Documents/skelsout.csv')
+    parser.add_argument('-r', '--regex', required=False, type=str, 
+                        help='Regex to find skeleton files (i.e ".*_cp_skel_[0-9]*.*")', default='.*')
+    parser.add_argument('-s', '--scale', required=False, type=float, 
+                        help='1 pixel = ? micrometers scale (i.e. "4.61" pixels = 1 um)', default=1.0)
+
+    args = vars(parser.parse_args())
+
+    main(args['fiji'], args['dir'], args['regex'], args['output'], args['scale'])
