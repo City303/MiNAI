@@ -1,6 +1,6 @@
 import PySimpleGUIQt as sg
 import webbrowser
-import mina_batch
+import mcp_batch
 import os
 import threading
 import pickle
@@ -10,8 +10,8 @@ TEXT_WIDTH = 16
 
 #FUNCTION DECLARATION/IMPLEMENTATION
 
-def run_mina(fiji_dir, skeleton_dir, regex_str, out_folder, out_file, pix_um_scale):
-    '''Calls the mina_batch.py script with the given parameters,
+def run_mcp(fiji_dir, skeleton_dir, regex_str, out_folder, out_file, pix_um_scale):
+    '''Calls the mcp_batch.py script with the given parameters,
     along with a callback to inform you the program has completed.
 
     Parameters:
@@ -44,7 +44,7 @@ def run_mina(fiji_dir, skeleton_dir, regex_str, out_folder, out_file, pix_um_sca
         pix_um_scale = float(pix_um_scale)
 
     def mb_wrapper(fiji_dir, skeleton_dir, regex_str, out_path, pix_um_scale):
-        mina_batch.main(fiji_dir, skeleton_dir, regex_str, out_path, pix_um_scale)
+        mcp_batch.main(fiji_dir, skeleton_dir, regex_str, out_path, pix_um_scale)
 
         # Display the "Done!" window
         done_layout = [ [sg.Text('Batch processing done!')] ]
@@ -64,17 +64,17 @@ def run_mina(fiji_dir, skeleton_dir, regex_str, out_folder, out_file, pix_um_sca
     th.start()
 
 def open_docs():
-    '''Opens the GitHub wiki so a user can read about how the program works.
+    '''Opens a documentation file to explain how MitoCellPhe works.
     '''
-    webbrowser.open('https://github.com/City303/MiNAI/wiki')
+    webbrowser.open('http://csce.uark.edu/~cbmolder/mitocellphe/doc.pdf')
 
 def about_window():
     '''Opens an about window to give credit to the authors / paper.
     '''
-    about_layout = [ [sg.Text('MiNAI')],
+    about_layout = [ [sg.Text('MitoCellPhe')],
                      [sg.Text('By Benjamin Lowe, Carson Molder and some other people')],
                      [sg.Button('Close')] ]
-    about_window = sg.Window('About MiNAI', about_layout)
+    about_window = sg.Window('About MitoCellPhe', about_layout)
 
     while True:
         event, vaules = about_window.read()
@@ -92,7 +92,7 @@ def help_fijidir():
                     [sg.Text('For example, it may be:')],
                     [sg.Text('    Windows: C:\\Users\\{your username}\\Fiji.app\\')],
                     [sg.Text('    Linux:   /home/{your username}/Fiji.app/')],
-                    [sg.Text('Also, make sure the Jython plugin is installed in your Fiji installation for MiNAI to work.')],
+                    [sg.Text('Also, make sure the Jython plugin is installed in your Fiji installation for MitoCellPhe to work.')],
                     [sg.Button('Close', size=(15,0.9))] ]
     help_window = sg.Window('Help', help_layout)
     
@@ -263,7 +263,7 @@ def main():
     menu_def = [['&File', ['&Save Parameters', '&Load Parameters', '&Quit']], ['&Help', ['&Documentation', '&About']]]
                  
     layout = [ [sg.Menu(menu_def)],
-               [sg.Text('MiNAI Morphology Analysis Settings', justification='center')],
+               [sg.Text('MitoCellPhe Morphology Analysis Settings', justification='center')],
                # [sg.Button('Load Parameters', size=(24,0.85), key='-LOAD-'), sg.Button('Save Parameters', size=(24,0.85),key='-SAVE-')],
                [sg.Text('Select FIJI directory',  size=(TEXT_WIDTH,1)), sg.Input(size=(2*TEXT_WIDTH,0.85),key='-FIJIDIRin-'),    sg.FolderBrowse(size=(10,0.9),key='-FIJIDIRBrowse-'), sg.Button('?', key='?Fiji', size=(4,0.9))] ,
                [sg.Text('Select skeleton folder', size=(TEXT_WIDTH,1)), sg.Input(size=(2*TEXT_WIDTH,0.85), key='-SKELSELECTin-'),sg.FolderBrowse(size=(10,0.9), key='SKELSELECTBrowse-'), sg.Button('?', key='?SkeletonFolder', size=(4,0.9))],
@@ -273,7 +273,7 @@ def main():
                [sg.Text('1 pix = ? um',           size=(TEXT_WIDTH,1)), sg.InputText(size=(2*TEXT_WIDTH,0.85), key='-SCALEin-'),           sg.Button('?', key='?Scale', size=(4,0.9)),   sg.Text('(optional)')],
                [sg.Button('Run', size=(15,0.9)), sg.Button('Quit', size=(15,0.9))] ]
 
-    window = sg.Window('MiNAI', layout)
+    window = sg.Window('MitoCellPhe', layout)
 
     while True:
         event, values = window.read()
@@ -301,8 +301,8 @@ def main():
                 #    print('key', key, 'item', val)
                 #values = new_values
         elif event == 'Run':
-            #run_mina(fiji_dir, skeleton_dir, regex_str, out_folder, out_file, pix_um_scale)
-            run_mina(values['-FIJIDIRin-'], values['-SKELSELECTin-'], values['-REGEX-'], values['-OUTPUTFOLDERin-'], values['-OUTPUTFILENAMEin-'], values['-SCALEin-'])
+            #run_mcp(fiji_dir, skeleton_dir, regex_str, out_folder, out_file, pix_um_scale)
+            run_mcp(values['-FIJIDIRin-'], values['-SKELSELECTin-'], values['-REGEX-'], values['-OUTPUTFOLDERin-'], values['-OUTPUTFILENAMEin-'], values['-SCALEin-'])
         elif event == '?Fiji':
             help_fijidir()
         elif event == '?SkeletonFolder':

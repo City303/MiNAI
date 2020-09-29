@@ -3,8 +3,7 @@ import os, re
 import imagej
 import pandas as pd
 
-# TODO convert to relpath or make it changable
-MACRO_PATH = '/home/mitocab/GitHub/MiNAI/fiji/mina_analysis.py'
+MACRO_PATH  = os.path.realpath('../fiji/mina_analysis.py')
 
 OUTPUT_ORDER = [
     'image_title',
@@ -131,7 +130,9 @@ def main(fiji_exec_path, root_path, regex_str, output_path, pix_to_um_scale=1.0)
     print(ij.getApp().getInfo(True))
 
     # Load mina_analysis macro
-    print('Reading MiNAI macro file...')
+    print('Reading MiNAI macro file at:')
+    print(f'    {MACRO_PATH}')
+
     with open(MACRO_PATH, 'r') as f:
         mina_macro = f.read()
 
