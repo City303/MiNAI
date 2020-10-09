@@ -138,12 +138,7 @@ def main(fiji_exec_path, root_path, regex_str, output_path, pix_to_um_scale=1.0)
     mcp_args = {
         'root_directory': str(root_path),
         'regex_string'  : str(regex_str),
-        'thresholding_op': 'otsu',
         'use_ridge_detection': False,
-        'rd_max': 75,
-        'rd_min': 5,
-        'rd_width': 1,
-        'rd_length': 3,
         'verbose': True
     }
 
@@ -159,7 +154,7 @@ def main(fiji_exec_path, root_path, regex_str, output_path, pix_to_um_scale=1.0)
     print('    Root directory   :', root_path)
     print('    Regex string     :', regex_str)
     print('    Number of matches:', match_cnt)
-    result = ij.py.run_script('py', mcp_macro, mcp_macro) # Run MitoCellPhe on the IJ module
+    result = ij.py.run_script('py', mcp_macro, mcp_args) # Run MitoCellPhe on the IJ module
     ij_out = ij.py.from_java(result.getOutputs())         # Get the outputs
     py_out = {} # Have to manually copy the IJ dictionary to Python, even though
                 # it is already Python-ated (because it is a JavaMap and not a dict)
