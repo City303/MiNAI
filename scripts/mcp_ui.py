@@ -1,4 +1,4 @@
-import PySimpleGUIQt as sg
+import PySimpleGUI as sg
 import webbrowser
 import mcp_batch
 import os
@@ -72,7 +72,8 @@ def about_window():
     '''Opens an about window to give credit to the authors / paper.
     '''
     about_layout = [ [sg.Text('MitoCellPhe')],
-                     [sg.Text('By Benjamin Lowe, Carson Molder and some other people')],
+                     [sg.Text('By Benjamin Lowe, Carson Molder, Ajibola Bakare, Fibi Meshrkey,\nJustin Zhan, Raj Raghavendra Rao, and Shilpa Iyer')],
+                     [sg.Text('(C) 2020. All rights reserved.')],
                      [sg.Button('Close')] ]
     about_window = sg.Window('About MitoCellPhe', about_layout)
 
@@ -93,7 +94,7 @@ def help_fijidir():
                     [sg.Text('    Windows: C:\\Users\\{your username}\\Fiji.app\\')],
                     [sg.Text('    Linux:   /home/{your username}/Fiji.app/')],
                     [sg.Text('Also, make sure the Jython plugin is installed in your Fiji installation for MitoCellPhe to work.')],
-                    [sg.Button('Close', size=(15,0.9))] ]
+                    [sg.Button('Close', size=(15,1))] ]
     help_window = sg.Window('Help', help_layout)
     
     while True:
@@ -116,7 +117,7 @@ def help_skeletonfolder():
                     [sg.Text('IF your skeleton folder contains other images (eg. original stain images, phase contrast images),')],
                     [sg.Text('then use the Regex string field to select the stain images.')],
                     [sg.Text('This will only work if your skeleton images have a consistent naming scheme that can be matched to a Regex pattern.')],
-                    [sg.Button('Close', size=(15,0.9))] ]
+                    [sg.Button('Close', size=(15,1))] ]
     help_window = sg.Window('Help', help_layout)
 
     while True:
@@ -188,8 +189,8 @@ def checkValues(values):
 
 def save_params(main_menu_values):
     save_layout = [ [sg.Text('Saves the config values')],
-                    [sg.Text('Folder', size=(TEXT_WIDTH,1)), sg.Input(size=(2*TEXT_WIDTH, 0.85), key='-FOLDER-'), sg.FolderBrowse(size=(10,0.9))],
-                    [sg.Text('Filename', size=(TEXT_WIDTH,1)), sg.Input(size=(2*TEXT_WIDTH, 0.85),key='-CONFIGFN-')],
+                    [sg.Text('Folder', size=(TEXT_WIDTH,1)), sg.Input(size=(2*TEXT_WIDTH, 1), key='-FOLDER-'), sg.FolderBrowse(size=(10,1))],
+                    [sg.Text('Filename', size=(TEXT_WIDTH,1)), sg.Input(size=(2*TEXT_WIDTH, 1),key='-CONFIGFN-')],
                     [sg.Button('Save'), sg.Button('Cancel')] ]
     save_window = sg.Window('Save Parameters...', save_layout)
 
@@ -228,15 +229,15 @@ def save_params(main_menu_values):
                                        
 def load_params():
     load_layout = [ [sg.Text('Loads config values from file')],
-                    [sg.Text('File Path', size=(TEXT_WIDTH,1)), sg.Input(size=(2*TEXT_WIDTH,0.85), key='-FILELOC-'), sg.FileBrowse(size=(10,0.9))],
+                    [sg.Text('File Path', size=(TEXT_WIDTH,1)), sg.Input(size=(2*TEXT_WIDTH,1), key='-FILELOC-'), sg.FileBrowse(size=(10,1))],
                     [sg.Button('Load'), sg.Button('Cancel')] ]
     load_window = sg.Window('Load Parameters...', load_layout)
-    new_values = None
+    new_values  = None
     
     while True:
         event, values = load_window.read()
-        print(event)
-        print(values)
+        # print(event)
+        # print(values)
         if (event == sg.WIN_CLOSED or event == 'Cancel'):
             break
         elif event == 'Load':
@@ -258,22 +259,20 @@ def load_params():
                                        
 def main():
 
-    sg.set_options(font='Cantarell 12')
-
     menu_def = [['&File', ['&Save Parameters', '&Load Parameters', '&Quit']], ['&Help', ['&Documentation', '&About']]]
                  
     layout = [ [sg.Menu(menu_def)],
-               [sg.Text('MitoCellPhe Morphology Analysis Settings', justification='center')],
+               [sg.Text('MitoCellPhe Analyzer Settings', justification='center')],
                # [sg.Button('Load Parameters', size=(24,0.85), key='-LOAD-'), sg.Button('Save Parameters', size=(24,0.85),key='-SAVE-')],
-               [sg.Text('Select FIJI directory',  size=(TEXT_WIDTH,1)), sg.Input(size=(2*TEXT_WIDTH,0.85),key='-FIJIDIRin-'),    sg.FolderBrowse(size=(10,0.9),key='-FIJIDIRBrowse-'), sg.Button('?', key='?Fiji', size=(4,0.9))] ,
-               [sg.Text('Select skeleton folder', size=(TEXT_WIDTH,1)), sg.Input(size=(2*TEXT_WIDTH,0.85), key='-SKELSELECTin-'),sg.FolderBrowse(size=(10,0.9), key='SKELSELECTBrowse-'), sg.Button('?', key='?SkeletonFolder', size=(4,0.9))],
-               [sg.Text('Regex string',           size=(TEXT_WIDTH,1)), sg.InputText('.*', size=(2*TEXT_WIDTH,0.85),key='-REGEX-'),                             sg.Button('?', key='?Regex', size=(4,0.9))],
-               [sg.Text('Select output folder',   size=(TEXT_WIDTH,1)), sg.Input(size=(2*TEXT_WIDTH,0.85),key='-OUTPUTFOLDERin-'),               sg.FolderBrowse(size=(10,0.9),key='-OUTPUTFOLDERBrowse-'), sg.Button('?', key='?OutputDir', size=(4,0.9))],
-               [sg.Text('Output file name',       size=(TEXT_WIDTH,1)), sg.Input('output.csv', size=(2*TEXT_WIDTH,0.85),key='-OUTPUTFILENAMEin-'),                                 sg.Button('?', key='?OutputFile', size=(4,0.9))],
-               [sg.Text('1 pix = ? um',           size=(TEXT_WIDTH,1)), sg.InputText(size=(2*TEXT_WIDTH,0.85), key='-SCALEin-'),           sg.Button('?', key='?Scale', size=(4,0.9)),   sg.Text('(optional)')],
-               [sg.Button('Run', size=(15,0.9)), sg.Button('Quit', size=(15,0.9))] ]
+               [sg.Text('Select FIJI directory',  size=(TEXT_WIDTH,1)), sg.Input(size=(2*TEXT_WIDTH,1),key='-FIJIDIRin-'),    sg.FolderBrowse(size=(10,1),key='-FIJIDIRBrowse-'), sg.Button('?', key='?Fiji', size=(4,1))] ,
+               [sg.Text('Select skeleton folder', size=(TEXT_WIDTH,1)), sg.Input(size=(2*TEXT_WIDTH,1), key='-SKELSELECTin-'),sg.FolderBrowse(size=(10,1), key='SKELSELECTBrowse-'), sg.Button('?', key='?SkeletonFolder', size=(4,1))],
+               [sg.Text('Regex string',           size=(TEXT_WIDTH,1)), sg.InputText('.*', size=(2*TEXT_WIDTH,1),key='-REGEX-'),                             sg.Button('?', key='?Regex', size=(4,1))],
+               [sg.Text('Select output folder',   size=(TEXT_WIDTH,1)), sg.Input(size=(2*TEXT_WIDTH,1),key='-OUTPUTFOLDERin-'),               sg.FolderBrowse(size=(10,1),key='-OUTPUTFOLDERBrowse-'), sg.Button('?', key='?OutputDir', size=(4,1))],
+               [sg.Text('Output file name',       size=(TEXT_WIDTH,1)), sg.Input('output.csv', size=(2*TEXT_WIDTH,1),key='-OUTPUTFILENAMEin-'),                                 sg.Button('?', key='?OutputFile', size=(4,1))],
+               [sg.Text('1 pix = ? um',           size=(TEXT_WIDTH,1)), sg.InputText(size=(2*TEXT_WIDTH,1), key='-SCALEin-'),           sg.Button('?', key='?Scale', size=(4,1)),   sg.Text('(optional)')],
+               [sg.Button('Run', size=(15,1)), sg.Button('Quit', size=(15,1))] ]
 
-    window = sg.Window('MitoCellPhe', layout)
+    window = sg.Window('MitoCellPhe Analyzer', layout)
 
     while True:
         event, values = window.read()

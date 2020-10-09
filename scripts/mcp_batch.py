@@ -2,7 +2,7 @@ import sys, os, re, argparse
 import imagej
 import pandas as pd
 
-MACRO_PATH  = os.path.realpath('../fiji/mcp_analysis.py')
+MACRO_PATH  = os.path.realpath('./mcp_fiji_analysis.py')
 
 OUTPUT_ORDER = [
     'image_title',
@@ -136,10 +136,15 @@ def main(fiji_exec_path, root_path, regex_str, output_path, pix_to_um_scale=1.0)
         mcp_macro = f.read()
 
     mcp_args = {
-        'root_directory': root_path,
-        'regex_string'  : regex_str,
+        'root_directory': str(root_path),
+        'regex_string'  : str(regex_str),
+        'thresholding_op': 'otsu',
         'use_ridge_detection': False,
-        'verbose': False,
+        'rd_max': 75,
+        'rd_min': 5,
+        'rd_width': 1,
+        'rd_length': 3,
+        'verbose': True
     }
 
     # Print the number of matches with the regex you provided.
