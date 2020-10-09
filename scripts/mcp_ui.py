@@ -46,6 +46,9 @@ def run_mcp(fiji_dir, skeleton_dir, regex_str, out_folder, out_file, pix_um_scal
     def mb_wrapper(fiji_dir, skeleton_dir, regex_str, out_path, pix_um_scale):
         mcp_batch.main(fiji_dir, skeleton_dir, regex_str, out_path, pix_um_scale)
 
+        # TODO Find a way to display this window from the main thread,
+        # as Python doesn't like mulithreaded Tkinter.
+        #
         # Display the "Done!" window
         done_layout = [ [sg.Text('Batch processing done!')] ]
         done_window = sg.Window('Update', done_layout)
