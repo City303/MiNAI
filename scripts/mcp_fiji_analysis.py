@@ -337,6 +337,22 @@ def run():
 
         # rt.show("Mito Morphology") # Do not show in headless mode
 
+        # Delete to save memory
+        del graphs
+        del skeleton
+        del skel
+        del slices
+        del frames
+        del binary_img
+        del binary
+        del imp_calibration
+        del imp_channel
+        del imp_title
+        del img
+
+        
+
+        '''
         # Create overlays on the original ImagePlus and display them if 2D...
         if imp.getNSlices() == 1:
             if verbose:
@@ -357,6 +373,7 @@ def run():
 
             imp.setOverlay(overlay)
             imp.updateAndDraw()
+        '''
 
         '''
         # Generate a 3D model if a stack

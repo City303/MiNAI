@@ -139,7 +139,7 @@ def main(fiji_exec_path, root_path, regex_str, output_path, pix_to_um_scale=1.0)
         'root_directory': str(root_path),
         'regex_string'  : str(regex_str),
         'use_ridge_detection': False,
-        'verbose': True
+        'verbose': False
     }
 
     # Print the number of matches with the regex you provided.
