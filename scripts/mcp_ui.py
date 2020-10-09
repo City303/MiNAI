@@ -266,10 +266,10 @@ def main():
                # [sg.Button('Load Parameters', size=(24,0.85), key='-LOAD-'), sg.Button('Save Parameters', size=(24,0.85),key='-SAVE-')],
                [sg.Text('Select FIJI directory',  size=(TEXT_WIDTH,1)), sg.Input(size=(2*TEXT_WIDTH,1),key='-FIJIDIRin-'),    sg.FolderBrowse(size=(10,1),key='-FIJIDIRBrowse-'), sg.Button('?', key='?Fiji', size=(4,1))] ,
                [sg.Text('Select skeleton folder', size=(TEXT_WIDTH,1)), sg.Input(size=(2*TEXT_WIDTH,1), key='-SKELSELECTin-'),sg.FolderBrowse(size=(10,1), key='SKELSELECTBrowse-'), sg.Button('?', key='?SkeletonFolder', size=(4,1))],
-               [sg.Text('Regex string',           size=(TEXT_WIDTH,1)), sg.InputText('.*', size=(2*TEXT_WIDTH,1),key='-REGEX-'),                             sg.Button('?', key='?Regex', size=(4,1))],
-               [sg.Text('Select output folder',   size=(TEXT_WIDTH,1)), sg.Input(size=(2*TEXT_WIDTH,1),key='-OUTPUTFOLDERin-'),               sg.FolderBrowse(size=(10,1),key='-OUTPUTFOLDERBrowse-'), sg.Button('?', key='?OutputDir', size=(4,1))],
-               [sg.Text('Output file name',       size=(TEXT_WIDTH,1)), sg.Input('output.csv', size=(2*TEXT_WIDTH,1),key='-OUTPUTFILENAMEin-'),                                 sg.Button('?', key='?OutputFile', size=(4,1))],
-               [sg.Text('1 pix = ? um',           size=(TEXT_WIDTH,1)), sg.InputText(size=(2*TEXT_WIDTH,1), key='-SCALEin-'),           sg.Button('?', key='?Scale', size=(4,1)),   sg.Text('(optional)')],
+               [sg.Text('Regex string',           size=(TEXT_WIDTH,1)), sg.InputText('.*', size=(2*TEXT_WIDTH,1),key='-REGEX-'), sg.Button('?', key='?Regex', size=(4,1))],
+               [sg.Text('Select output folder',   size=(TEXT_WIDTH,1)), sg.Input(size=(2*TEXT_WIDTH,1),key='-OUTPUTFOLDERin-'), sg.FolderBrowse(size=(10,1),key='-OUTPUTFOLDERBrowse-'), sg.Button('?', key='?OutputDir', size=(4,1))],
+               [sg.Text('Output file name',       size=(TEXT_WIDTH,1)), sg.Input('output.csv', size=(2*TEXT_WIDTH,1),key='-OUTPUTFILENAMEin-'), sg.Button('?', key='?OutputFile', size=(4,1))],
+               [sg.Text('1 pix = ? um',           size=(TEXT_WIDTH,1)), sg.InputText(size=(2*TEXT_WIDTH,1), key='-SCALEin-'), sg.Button('?', key='?Scale', size=(4,1)), sg.Text('(optional)')],
                [sg.Button('Run', size=(15,1)), sg.Button('Quit', size=(15,1))] ]
 
     window = sg.Window('MitoCellPhe Analyzer', layout)
