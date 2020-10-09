@@ -135,55 +135,77 @@ def help_regexstr():
     '''Opens a window explaining what the regular expression is, along
     with a link to the Python guide for them.
     '''
-    help_layout = [ [sg.Text('')],
-                    [sg.Text('')]]
+    help_layout = [ [sg.Text('A regular expression (AKA regex) is a way to describe a pattern.')],
+                    [sg.Text('The regular expression defined here is used to detect')],
+                    [sg.Text('filenames that match the pattern.')],
+                    [sg.Text('Default: .* (all filenames allowed)')],
+                    [sg.Text('Change this regex if skeleton directory contains other images.')],
+                    [sg.Button('Regex Guide (web)', size=(20,1)), sg.Button('Close', size=(15,1))]]
     help_window = sg.Window('Help', help_layout)
 
     while True:
         event, vaules = help_window.read()
-        print(event)
-        if event == sg.WIN_CLOSED:
+        if event == sg.WIN_CLOSED or event == 'Close':
             break
+        elif event == 'Regex Guide (web)':
+            webbrowser.open('https://docs.python.org/3/howto/regex.html')
 
+    help_window.close()
+    
+        
 def help_outputdir():
     '''Opens a window explaining what the output directory is.
     '''
-    help_layout = [ [sg.Text('')],
-                    [sg.Text('')]]
+    help_layout = [ [sg.Text('The output directory is the path to the folder that you would')],
+                    [sg.Text('like the outputs of this program to save into.')],
+                    [sg.Text('This program creates one output file which you name below.')],
+                    [sg.Button('Close', size=(15,1))] ]
     help_window = sg.Window('Help', help_layout)
 
     while True:
         event, vaules = help_window.read()
         print(event)
-        if event == sg.WIN_CLOSED:
+        if event == sg.WIN_CLOSED or event == 'Close':
             break
 
+    help_window.close()
+
+    
 def help_outputfile():
     '''Opens a window explaining what the output file is.
     '''
-    help_layout = [ [sg.Text('')],
-                    [sg.Text('')]]
+    help_layout = [ [sg.Text('The output file is comma-separated values file')],
+                    [sg.Text('which contains the output of the morphology analysis.')],
+                    [sg.Text('Set the output file\'s name in this field.')],
+                    [sg.Button('Close', size=(15,1))]]
     help_window = sg.Window('Help', help_layout)
 
     while True:
         event, vaules = help_window.read()
         print(event)
-        if event == sg.WIN_CLOSED:
+        if event == sg.WIN_CLOSED or event == 'Close':
             break
 
+    help_window.close()
+
+                    
 def help_pixumscale():
-    '''Opens a window explaining what the 1 px = ? um scale is.
+    '''Opens a window explaining what the ? px = 1 um scale is.
     '''
-    help_layout = [ [sg.Text('')],
-                    [sg.Text('')]]
+    help_layout = [ [sg.Text('Enter a conversion ratio to convert measurements to micrometers.')],
+                    [sg.Text('Leave blank or input 1 to leave units in pixels.')],
+                    [sg.Button('Close', size=(15,1))]]
     help_window = sg.Window('Help', help_layout)
 
     while True:
         event, values = help_window.read()
         print(event)
-        if event == sg.WIN_CLOSED:
+        if event == sg.WIN_CLOSED or event == 'Close':
             break
 
+    help_window.close()
+
+        
 def checkValues(values):
     '''
     Check the input fields for run to make sure they are valid..
