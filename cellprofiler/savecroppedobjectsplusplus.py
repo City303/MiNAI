@@ -297,8 +297,11 @@ prompt.""".format(**{
 				filename += suffix
 
 		pathname = self.pathname.get_absolute_path(measurements)
-                print('pathname_old', pathname)
-		if self.create_subdirectories:
+		print('pathname_old', pathname)
+
+		# TODO Debug and check for errors in determining path if create subdirectories
+		# is enabled
+		if self.create_subdirectories and not self.pathname.dir_choice == PC_WITH_IMAGE:
 			image_path = self.source_path(workspace)
                         common_prefix = os.path.commonprefix([pathname, image_path]).rpartition('/')[0]
 			subdir = os.path.relpath(image_path, start=common_prefix)
@@ -320,7 +323,11 @@ prompt.""".format(**{
 				#
 				if not os.path.isdir(pathname):
 					raise
+
+		print('pathname', pathname)
+		print('filename', filename)
 		result = os.path.join(pathname, filename)
+		print('pathname_old + filename', result)
 		if check_overwrite and not self.check_overwrite(result, workspace):
 			return
 
