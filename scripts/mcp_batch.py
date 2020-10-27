@@ -2,7 +2,7 @@ import sys, os, re, argparse
 import imagej
 import pandas as pd
 
-MACRO_PATH  = os.path.realpath('./mcp_fiji_analysis.py')
+MACRO_PATH  = os.path.join(os.getcwd(), 'mcp_fiji_analysis.py')
 
 OUTPUT_ORDER = [
     'image_title',
@@ -129,6 +129,8 @@ def main(fiji_exec_path, root_path, regex_str, output_path, pix_to_um_scale=1.0)
     print(ij.getApp().getInfo(True))
 
     # Load mcp_analysis macro
+    print('Current directory:')
+    print(f'    {os.getcwd()}')
     print('Reading MitoCellPhe macro file at:')
     print(f'    {MACRO_PATH}')
 
