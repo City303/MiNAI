@@ -301,15 +301,20 @@ prompt.""".format(**{
 		if self.create_subdirectories:
 			image_path = self.source_path(workspace)
                         common_prefix = os.path.commonprefix([pathname, image_path]).rpartition('/')[0]
+                        
 			subdir = os.path.relpath(image_path, start=common_prefix)
 			pathname = os.path.join(pathname, subdir)
+                        
                         ########################################
                         ########################################
                         #######################################
-                        # print('image_path', image_path)
-                        # print('subdir', subdir)
-                        # print('join(pathname, subdir)', pathname)
-                        # print('root_dir.get_abs_path', self.root_dir.get_absolute_path())
+                        print('pathname', pathname)
+                        print('image_path', image_path)
+                        print('common_prefix', common_prefix)
+                        print('subdir', subdir)
+                        print('join(pathname, subdir)', os.path.join(pathname, subdir))
+                        print('filename', filename)
+                        print('root_dir.get_abs_path', self.root_dir.get_absolute_path())
 		if len(pathname) and not os.path.isdir(pathname) and make_dirs:
 			try:
 				os.makedirs(pathname)
@@ -321,6 +326,7 @@ prompt.""".format(**{
 				if not os.path.isdir(pathname):
 					raise
 		result = os.path.join(pathname, filename)
+                
 		if check_overwrite and not self.check_overwrite(result, workspace):
 			return
 

@@ -315,11 +315,15 @@ def main():
             print('new_values from load:', new_values)
             if(new_values is not None):
                 print('NEW_VALUES:')
-                for key, val in new_values.items():
+                for key, val in values.items():
                     print('key', key, 'item', val)
                     if key == 0:
                         continue
-                    window[key].update(val)
+                    elif 'Browse' in key:
+                        print('found', key, window[key])
+                        window[key].update('Browse')
+                    else:    
+                        window[key].update(new_values[key])
                 #print('VALUES:')
                 #for key,val in values.items():
                 #    print('key', key, 'item', val)
