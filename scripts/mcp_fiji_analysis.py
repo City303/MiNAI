@@ -26,6 +26,10 @@
 #@output String rod_count
 #@output String network_count
 
+#@output String punctate_pct
+#@output String rod_pct
+#@output String network_pct
+
 #@output String rod_lens_mean
 #@output String rod_lens_med
 #@output String rod_lens_stdevp
@@ -154,6 +158,10 @@ def run():
         'rod_count',
         'network_count',
 
+        'punctate_pct',
+        'rod_pct',
+        'network_pct',
+
         'rod_lens_mean',
         'rod_lens_med',
         'rod_lens_stdevp',
@@ -270,7 +278,7 @@ def run():
 
         outputs['punctate_count'][-1] = punctates
 
-        outputs['rod_count'][-1]      = rods
+        outputs['rod_count'][-1]       = rods
         outputs['rod_lens_mean'][-1]   = average(rod_lens) if rods > 0 else 0
         outputs['rod_lens_med'][-1]    = median(rod_lens)  if rods > 0 else 0
         outputs['rod_lens_stdevp'][-1] = pstdev(rod_lens)  if rods > 0 else 0
@@ -282,6 +290,11 @@ def run():
         outputs['network_lens_mean'][-1]   = average(network_lens) if networks > 0 else 0
         outputs['network_lens_median'][-1] = median(network_lens) if networks > 0 else 0
         outputs['network_lens_stdevp'][-1] = pstdev(network_lens) if networks > 0 else 0
+
+        # Caluculate percentage paramters
+        outputs['punctate_pct'][-1] = 100.0 * punctates / (punctates + rods + networks)
+        outputs['rod_pct'][-1]      = 100.0 * rods / (punctates + rods + networks)
+        outputs['network_pct'][-1]  = 100.0 * networks / (punctates + rods + networks)
 
         if verbose:
             IJ.log("Computing graph based parameters...")

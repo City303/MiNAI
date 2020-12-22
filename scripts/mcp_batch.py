@@ -18,6 +18,10 @@ OUTPUT_ORDER = [
     'rod_count',
     'network_count',
 
+    'punctate_pct',
+    'rod_pct',
+    'network_pct',
+
     'rod_lens_mean',
     'rod_lens_med',
     'rod_lens_stdevp',
@@ -73,6 +77,10 @@ OUTPUT_FILTER = [
     'rod_count',
     'network_count',
 
+    'punctate_pct',
+    'rod_pct',
+    'network_pct',
+
     'rod_lens_mean',
     'rod_lens_med',
     'rod_lens_stdevp',
@@ -96,11 +104,15 @@ OUTPUT_FILTER = [
 
 OUTPUT_TITLES = [
     'Image title',
-    'Mitochondrial footprint',
+    'Skeleton area',
 
     'Punctate count',
     'Rod count',
     'Network count',
+
+    'Punctate percentage',
+    'Rod percentage',
+    'Network percentage',
 
     'Mean rod length',
     'Median rod length',
